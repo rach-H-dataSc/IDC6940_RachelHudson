@@ -1,6 +1,6 @@
 ---
 title: "Time Series Analysis of Sea Turtle Data"
-subtitle: "Slide Template Only"
+subtitle: "Slide Template"
 author: "Rachel Hudson (Advisor: Dr. Pu)"
 date: '`r Sys.Date()`'
 format:
