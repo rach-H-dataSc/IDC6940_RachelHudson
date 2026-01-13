@@ -85,8 +85,8 @@ ggplot1 = murders %>% ggplot(mapping = aes(x=population/10^6, y=total))
   scale_x_log10() +
   scale_y_log10() +
   geom_smooth(formula = "y~x", method=lm,se = F)+
-  xlab("Populations in millions (log10 scale)") + 
-  ylab("Total number of murders (log10 scale)") +
+  xlab("Populations in Millions (log10 scale)") + 
+  ylab("Total number of Murders (log10 scale)") +
   ggtitle("US Gun Murders in 2010") +
   scale_color_discrete(name = "Region")+
       theme_bw()
