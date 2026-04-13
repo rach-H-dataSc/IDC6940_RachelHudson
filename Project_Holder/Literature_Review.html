@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Rachel Hudson">
+
+<title>A Time Series Analysis on Nesting Habits of Loggerhead Turtles</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="Literature_Review_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Literature_Review_files/libs/quarto-html/quarto.js"></script>
+<script src="Literature_Review_files/libs/quarto-html/popper.min.js"></script>
+<script src="Literature_Review_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Literature_Review_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Literature_Review_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Literature_Review_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Literature_Review_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Literature_Review_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Literature_Review_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a>
+  <ul class="collapse">
+  <li><a href="#problem-definition" id="toc-problem-definition" class="nav-link" data-scroll-target="#problem-definition"><span class="header-section-number">1.1</span> Problem Definition</a></li>
+  <li><a href="#significance-and-motivation" id="toc-significance-and-motivation" class="nav-link" data-scroll-target="#significance-and-motivation"><span class="header-section-number">1.2</span> Significance and Motivation</a></li>
+  <li><a href="#loggerhead-turtle-tangent-florida-fish-and-wildlife-conservation-commision" id="toc-loggerhead-turtle-tangent-florida-fish-and-wildlife-conservation-commision" class="nav-link" data-scroll-target="#loggerhead-turtle-tangent-florida-fish-and-wildlife-conservation-commision"><span class="header-section-number">1.3</span> Loggerhead “Turtle Tangent” [Florida Fish and Wildlife Conservation Commision]</a></li>
+  <li><a href="#context-and-background" id="toc-context-and-background" class="nav-link" data-scroll-target="#context-and-background"><span class="header-section-number">1.4</span> Context and Background</a></li>
+  <li><a href="#objectives-and-goals" id="toc-objectives-and-goals" class="nav-link" data-scroll-target="#objectives-and-goals"><span class="header-section-number">1.5</span> Objectives and Goals</a></li>
+  <li><a href="#summary-of-approach" id="toc-summary-of-approach" class="nav-link" data-scroll-target="#summary-of-approach"><span class="header-section-number">1.6</span> Summary of Approach</a></li>
+  </ul></li>
+  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods"><span class="header-section-number">2</span> Methods</a>
+  <ul class="collapse">
+  <li><a href="#data-aquisition-and-sources" id="toc-data-aquisition-and-sources" class="nav-link" data-scroll-target="#data-aquisition-and-sources"><span class="header-section-number">2.1</span> Data Aquisition and Sources</a>
+  <ul class="collapse">
+  <li><a href="#additional-data" id="toc-additional-data" class="nav-link" data-scroll-target="#additional-data"><span class="header-section-number">2.1.1</span> Additional Data</a></li>
+  <li><a href="#buoy-coordinates-and-data-sample-sizes" id="toc-buoy-coordinates-and-data-sample-sizes" class="nav-link" data-scroll-target="#buoy-coordinates-and-data-sample-sizes"><span class="header-section-number">2.1.2</span> Buoy Coordinates and Data Sample Sizes</a></li>
+  <li><a href="#anova-comparison-of-temperature-data" id="toc-anova-comparison-of-temperature-data" class="nav-link" data-scroll-target="#anova-comparison-of-temperature-data"><span class="header-section-number">2.1.3</span> ANOVA Comparison of Temperature Data</a></li>
+  </ul></li>
+  <li><a href="#mathematical-and-statistical-modelling" id="toc-mathematical-and-statistical-modelling" class="nav-link" data-scroll-target="#mathematical-and-statistical-modelling"><span class="header-section-number">2.2</span> Mathematical and Statistical Modelling</a>
+  <ul class="collapse">
+  <li><a href="#exploratory-data-analysis-and-visualizations" id="toc-exploratory-data-analysis-and-visualizations" class="nav-link" data-scroll-target="#exploratory-data-analysis-and-visualizations"><span class="header-section-number">2.2.1</span> Exploratory Data Analysis and Visualizations</a></li>
+  <li><a href="#stationarity-of-data" id="toc-stationarity-of-data" class="nav-link" data-scroll-target="#stationarity-of-data"><span class="header-section-number">2.2.2</span> Stationarity of Data</a></li>
+  <li><a href="#decomposition-determination" id="toc-decomposition-determination" class="nav-link" data-scroll-target="#decomposition-determination"><span class="header-section-number">2.2.3</span> Decomposition Determination</a></li>
+  <li><a href="#model-selection" id="toc-model-selection" class="nav-link" data-scroll-target="#model-selection"><span class="header-section-number">2.2.4</span> Model Selection</a></li>
+  <li><a href="#training-and-validation" id="toc-training-and-validation" class="nav-link" data-scroll-target="#training-and-validation"><span class="header-section-number">2.2.5</span> Training and Validation</a></li>
+  <li><a href="#metrics" id="toc-metrics" class="nav-link" data-scroll-target="#metrics"><span class="header-section-number">2.2.6</span> Metrics</a></li>
+  <li><a href="#forecasting-and-residual-analysis" id="toc-forecasting-and-residual-analysis" class="nav-link" data-scroll-target="#forecasting-and-residual-analysis"><span class="header-section-number">2.2.7</span> Forecasting and Residual Analysis</a></li>
+  </ul></li>
+  <li><a href="#software-and-tools" id="toc-software-and-tools" class="nav-link" data-scroll-target="#software-and-tools"><span class="header-section-number">2.3</span> Software and Tools</a></li>
+  <li><a href="#ethical-considerations" id="toc-ethical-considerations" class="nav-link" data-scroll-target="#ethical-considerations"><span class="header-section-number">2.4</span> Ethical Considerations</a></li>
+  </ul></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results"><span class="header-section-number">3</span> Results</a>
+  <ul class="collapse">
+  <li><a href="#core-findings" id="toc-core-findings" class="nav-link" data-scroll-target="#core-findings"><span class="header-section-number">3.1</span> Core Findings</a>
+  <ul class="collapse">
+  <li><a href="#exploratory-data-analysis-and-visualizations-1" id="toc-exploratory-data-analysis-and-visualizations-1" class="nav-link" data-scroll-target="#exploratory-data-analysis-and-visualizations-1"><span class="header-section-number">3.1.1</span> Exploratory Data Analysis and Visualizations</a></li>
+  <li><a href="#stationarity-of-data-1" id="toc-stationarity-of-data-1" class="nav-link" data-scroll-target="#stationarity-of-data-1"><span class="header-section-number">3.1.2</span> Stationarity of Data</a></li>
+  <li><a href="#decomposition-determination-1" id="toc-decomposition-determination-1" class="nav-link" data-scroll-target="#decomposition-determination-1"><span class="header-section-number">3.1.3</span> Decomposition Determination</a></li>
+  <li><a href="#model-selection-1" id="toc-model-selection-1" class="nav-link" data-scroll-target="#model-selection-1"><span class="header-section-number">3.1.4</span> Model Selection</a></li>
+  <li><a href="#training-and-validation-1" id="toc-training-and-validation-1" class="nav-link" data-scroll-target="#training-and-validation-1"><span class="header-section-number">3.1.5</span> Training and Validation</a></li>
+  <li><a href="#forecasting" id="toc-forecasting" class="nav-link" data-scroll-target="#forecasting"><span class="header-section-number">3.1.6</span> Forecasting</a></li>
+  <li><a href="#metrics-1" id="toc-metrics-1" class="nav-link" data-scroll-target="#metrics-1"><span class="header-section-number">3.1.7</span> Metrics</a></li>
+  </ul></li>
+  <li><a href="#visualization-and-tables" id="toc-visualization-and-tables" class="nav-link" data-scroll-target="#visualization-and-tables"><span class="header-section-number">3.2</span> Visualization and Tables</a></li>
+  <li><a href="#model-performance-and-comparisons" id="toc-model-performance-and-comparisons" class="nav-link" data-scroll-target="#model-performance-and-comparisons"><span class="header-section-number">3.3</span> Model Performance and Comparisons</a></li>
+  <li><a href="#uncertainty-and-variability" id="toc-uncertainty-and-variability" class="nav-link" data-scroll-target="#uncertainty-and-variability"><span class="header-section-number">3.4</span> Uncertainty and Variability</a></li>
+  </ul></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion"><span class="header-section-number">4</span> Discussion</a>
+  <ul class="collapse">
+  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation"><span class="header-section-number">4.1</span> Interpretation</a></li>
+  <li><a href="#limitations-and-challenges" id="toc-limitations-and-challenges" class="nav-link" data-scroll-target="#limitations-and-challenges"><span class="header-section-number">4.2</span> Limitations and Challenges</a></li>
+  <li><a href="#implications" id="toc-implications" class="nav-link" data-scroll-target="#implications"><span class="header-section-number">4.3</span> Implications</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">5</span> Conclusion</a>
+  <ul class="collapse">
+  <li><a href="#conclusion-1" id="toc-conclusion-1" class="nav-link" data-scroll-target="#conclusion-1"><span class="header-section-number">5.1</span> Conclusion</a></li>
+  <li><a href="#future-work" id="toc-future-work" class="nav-link" data-scroll-target="#future-work"><span class="header-section-number">5.2</span> Future Work</a></li>
+  </ul></li>
+  <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes"><span class="header-section-number">6</span> Notes</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="Literature_Review.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li><li><a href="Literature_Review.docx"><i class="bi bi-file-word"></i>MS Word</a></li></ul></div></nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">A Time Series Analysis on Nesting Habits of Loggerhead Turtles</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Rachel Hudson </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
+<section id="problem-definition" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="problem-definition"><span class="header-section-number">1.1</span> Problem Definition</h2>
+<p>The goal of this project is to use Time Series Analysis to evaluate the seasonality of Loggerhead Turtle nesting habits, specifically, how predictable are the seasonal dates as to when turtle nesting season begins and ends as well as evaluating the influence of other environmental factors like water temperature.</p>
+<p>Time Series Analysis can be used for this experiment because of its associated ‘time stamp’ - a previous value can be compared with a present value and, is in turn, used to predict a future value for a particular time period, or forecasting based on comparable past data.</p>
+</section>
+<section id="significance-and-motivation" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="significance-and-motivation"><span class="header-section-number">1.2</span> Significance and Motivation</h2>
+<p>The data came from Dr.&nbsp;Schmutz of the Department of Environmental Science and then provided to Dr.&nbsp;Seals of the Department of Mathematics and Statistics (both of the University of West Florida) as a collaborative effort to statistically study the nesting habits of Loggerhead Turtles along the Gulf Coast of Florida.</p>
+<p>Our interdisciplinary team presented this study so that I could be part of a research team and gain the valuable knowledge and skills that are required in a realistic work environment; the types of questions to ask the “customer” (Schmutz) vs.&nbsp;the questions to ask the “supervisor” (Seals). Also, the collaborative nature of this project creates and strengthens departmental partnerships within the university for future research opportunities.</p>
+<p>The results generated by this study will help local environmentalists with their conservation activities to aid the safe and successful nesting of Loggerhead Turtles in our area.</p>
+</section>
+<section id="loggerhead-turtle-tangent-florida-fish-and-wildlife-conservation-commision" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="loggerhead-turtle-tangent-florida-fish-and-wildlife-conservation-commision"><span class="header-section-number">1.3</span> Loggerhead “Turtle Tangent” [Florida Fish and Wildlife Conservation Commision]</h2>
+<ul>
+<li>Threatened Species (at the State and Federal Level)</li>
+<li>reach sexual maturity at 35 years old</li>
+<li>females return to their nesting site every 2 (or more) years</li>
+<li>average of 4 nests created each season per female turtle with one being created about every 14 days</li>
+<li>Florida is host to about 100,000 nests each year (Brevard and Palm Beach counties account for about 50,000)</li>
+</ul>
+</section>
+<section id="context-and-background" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="context-and-background"><span class="header-section-number">1.4</span> Context and Background</h2>
+<p>A Time Series Analysis was suggested to be the best approach when looking at the research Problem Definition, particularly the seasonal aspect of the beginning and end of the annual nesting period. The methodology of the Time Series Analysis is broken down into steps that can be iterative in nature depending on the results from each step. These steps include exploring the data and possible relationships; examining the stationarity of data; determining which decomposition method will be used (additive or multiplicative); selecting a model to “capture underlying data patterns based on characteristics such as seasonality, trend, and stationarity” <span class="citation" data-cites="MathWorks">(<a href="#ref-MathWorks" role="doc-biblioref">MathWorks 2026</a>)</span>; the training and validation of the model; assessing the resulting metrics, forecast outcomes and consequential residuals. Since this is a study on Biological Data, it is will likely result in a strong seasonal model; therefore, non-linear models will suit the data more consistently, for example, ARIMA model with a suitable “fit” enhancement.</p>
+</section>
+<section id="objectives-and-goals" class="level2" data-number="1.5">
+<h2 data-number="1.5" class="anchored" data-anchor-id="objectives-and-goals"><span class="header-section-number">1.5</span> Objectives and Goals</h2>
+<p>TBD</p>
+</section>
+<section id="summary-of-approach" class="level2" data-number="1.6">
+<h2 data-number="1.6" class="anchored" data-anchor-id="summary-of-approach"><span class="header-section-number">1.6</span> Summary of Approach</h2>
+<ul>
+<li><p>Acquire and Clean Data</p></li>
+<li><p>Exploratory Data Analysis and Visualizations</p>
+<ul>
+<li>Investigating variable relationships</li>
+</ul></li>
+<li><p>Stationarity of Data</p>
+<ul>
+<li>Testing for Constant Mean, Variance, Autocorrelation</li>
+<li>Time Series Plot - Visual Verification</li>
+<li>ADF - Augmented Dickey-Fuller Test (Unit Root Test) - Statistical Verification</li>
+</ul></li>
+<li><p>Decomposition Determination</p>
+<ul>
+<li>Additive or Multiplicative</li>
+<li>Interpreting Season/Trend/Residuals (STL - Seasonal-Trend decomposition using Loess)</li>
+<li>Strength of Trend and Seasonality</li>
+</ul></li>
+<li><p>Model Selection</p>
+<ul>
+<li>PACF &amp; ACF - Partial and Autocorrelation Function (Plot) - Visual Verification</li>
+<li>Determining p, q, d, P, Q, D</li>
+<li>Define the model e.g., ARMA, ARIMA, SARIMA, etc</li>
+</ul></li>
+<li><p>Training and Validation</p>
+<ul>
+<li>Box-Cox Transformation, LOESS Smoothing, Fourier Transform, Neighbor Test, Exponential Smoothing, GAMs options</li>
+<li>Holt-Winters model (RMSE) for metric comparison</li>
+</ul></li>
+<li><p>Metrics</p>
+<ul>
+<li>RMSE</li>
+<li>ARIMA</li>
+</ul></li>
+<li><p>Forecasting and Residual Analysis</p></li>
+</ul>
+</section>
+</section>
+<section id="methods" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Methods</h1>
+<section id="data-aquisition-and-sources" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="data-aquisition-and-sources"><span class="header-section-number">2.1</span> Data Aquisition and Sources</h2>
+<p>Data was collected from 1998 to 2020 and prime nesting season was defined from May through the end of September. When a nest was discovered, it immediately populated a date and the unique longitude and latitude of the nesting spot within the dataset; other variables included were the beach that the nest was spotted and the species of turtle that made the nest. Water temperature was added from a buoy that had a complete set of data and within the immediate area of the Gulf beaches. The temperature data was added to investigate if it has any relationship when the nesting season begins or ends.</p>
+<p>The original dataset contains initials of the locations and species - see below their full meanings:</p>
+<ul>
+<li>“PB” - “Pensacola Beach”</li>
+<li>“SR” - “Santa Rosa Beach”</li>
+<li>“PK” - “Perdido Key”</li>
+<li>“FP” - “Fort Pickens”</li>
+<li>“CC” - “Caretta caretta”, Loggerhead Turtle</li>
+<li>“CM” - “Chelonia mydas”, Green Turtle</li>
+<li>“DC” - “Dermochelys coriacea”, Leatherback Turtle</li>
+<li>“LK” - “Lepidochelys kempii”, Kemp’s Riley Turtle</li>
+</ul>
+<p>Although 4 turtle species were identified in the study, our primary focus was on Loggerhead Turtles, Carrera carrera, see <a href="#fig-ind-plots" class="quarto-xref">Figure&nbsp;6</a> for individual season plots.</p>
+<div class="cell">
+<div id="tbl-CCdata-table" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-CCdata-table-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Data Table (with Surface Water Temperature added) of the Nesting Habits of Loggerhead Turtles: 1988-2020
+</figcaption>
+<div aria-describedby="tbl-CCdata-table-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">C_Date</th>
+<th style="text-align: center;">Location</th>
+<th style="text-align: center;">Water Temp. (degC)</th>
+<th style="text-align: center;">Latitude</th>
+<th style="text-align: center;">Longitude</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1998-06-29</td>
+<td style="text-align: center;">PK</td>
+<td style="text-align: center;">29.9</td>
+<td style="text-align: center;">30.29946</td>
+<td style="text-align: center;">-87.41041</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1998-06-24</td>
+<td style="text-align: center;">PK</td>
+<td style="text-align: center;">30.5</td>
+<td style="text-align: center;">30.30090</td>
+<td style="text-align: center;">-87.40399</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1998-07-07</td>
+<td style="text-align: center;">PK</td>
+<td style="text-align: center;">30.8</td>
+<td style="text-align: center;">30.30253</td>
+<td style="text-align: center;">-87.39704</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1998-07-17</td>
+<td style="text-align: center;">PK</td>
+<td style="text-align: center;">29.9</td>
+<td style="text-align: center;">30.30348</td>
+<td style="text-align: center;">-87.39326</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1998-06-17</td>
+<td style="text-align: center;">PK</td>
+<td style="text-align: center;">29.0</td>
+<td style="text-align: center;">30.30486</td>
+<td style="text-align: center;">-87.38802</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<section id="additional-data" class="level3" data-number="2.1.1">
+<h3 data-number="2.1.1" class="anchored" data-anchor-id="additional-data"><span class="header-section-number">2.1.1</span> Additional Data</h3>
+<p>Our team was influenced by the initial literary review <span class="citation" data-cites="Mazaris2004">(<a href="#ref-Mazaris2004" role="doc-biblioref">Mazaris 2004</a>)</span> where temperature data also collected and Dr.&nbsp;Schmutz found that there are many buoys in the region of study along the Gulf Coast. He picked two buoys (42012 and 42028) and I was tasked to look at their data and pair temperature data with the dates of new nest discovery. Unfortunately, the data sets were incomplete in that the temperature data did not go back 22 years for either buoy. I was able to look further and found Station 42039 further out into the Gulf. Station 42028 was dropped from the set of stations since there was too little data; the other three stations were compared with each other to make sure we could use Station 42039.</p>
+</section>
+<section id="buoy-coordinates-and-data-sample-sizes" class="level3" data-number="2.1.2">
+<h3 data-number="2.1.2" class="anchored" data-anchor-id="buoy-coordinates-and-data-sample-sizes"><span class="header-section-number">2.1.2</span> Buoy Coordinates and Data Sample Sizes</h3>
+<p>Station 42012 - Orange Beach, AL - 30.060 N 87.548 W (30°3’36” N 87°32’54” W) -&gt; 2009-2020</p>
+<p>Station 42028 - South Destin - 29.745 N 86.227 W (29°44’42” N 86°13’37” W) -&gt; January, 2026</p>
+<p>Station PCLF1 - Pensacola, FL (near NAS) - 30.404 N 87.211 W (30°24’14” N 87°12’40” W) -&gt; 2005-2020</p>
+<p>Station 42039 - Pensacola South - 28.787 N 86.007 W (28°47’12” N 86°0’24” W) -&gt; 1998-2020</p>
+</section>
+<section id="anova-comparison-of-temperature-data" class="level3" data-number="2.1.3">
+<h3 data-number="2.1.3" class="anchored" data-anchor-id="anova-comparison-of-temperature-data"><span class="header-section-number">2.1.3</span> ANOVA Comparison of Temperature Data</h3>
+<p>Station 42012, PCLF1, and 42039 were compared and the results proved that we would be able to use Station 42039. The <em>p-value</em> was less than 0.01 (0.00635) which makes the result extremely significant (see <a href="#tbl-buoy-tukey-table" class="quarto-xref">Table&nbsp;2</a>). The average differences between the following station temperatures were found to be 0.01 to 0.227 deg Celsius as shown below:</p>
+<p>|42012 vs PCLF1| = 0.013 degrees Celsius</p>
+<p>|42039 vs PCLF1| = 0.214 degrees Celsius</p>
+<p>|42039 vs 42012| = 0.227 degrees Celsius</p>
+<p>These result cemented the conclusion that Station 42039 could be used even though it was located further away from the Gulf coastline where the turtles nest (see <a href="#fig-spatial" class="quarto-xref">Figure&nbsp;1</a> and <a href="#fig-buoy-comp" class="quarto-xref">Figure&nbsp;2</a>) and a snippet of the final dataset is shown in <a href="#tbl-CCdata-table" class="quarto-xref">Table&nbsp;1</a>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-spatial" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-spatial-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Literature_Review_files/figure-html/fig-spatial-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-spatial-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Spatial Mapping Of Loggerhead Nesting Sites including Station 42039 Buoy Location
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="mathematical-and-statistical-modelling" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="mathematical-and-statistical-modelling"><span class="header-section-number">2.2</span> Mathematical and Statistical Modelling</h2>
+<p>Overall, Time Series Analysis is a layered methodology where each layer can strengthen the fit and forecast of the overall model. The main steps of the analysis include:</p>
+<ul>
+<li>Exploratory Data Analysis and Visualizations</li>
+<li>Stationarity of Data</li>
+<li>Decomposition Determination</li>
+<li>Model Selection</li>
+<li>Training and Validation</li>
+<li>Metrics</li>
+<li>Forecasting and Residual Analysis</li>
+</ul>
+<section id="exploratory-data-analysis-and-visualizations" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="exploratory-data-analysis-and-visualizations"><span class="header-section-number">2.2.1</span> Exploratory Data Analysis and Visualizations</h3>
+<p>The first series of analysis involves</p>
+<ul>
+<li>making sure the that the points are in time order and occurs at a consistent frequency</li>
+<li>looking for patterns in the data and how the data changes over time</li>
+<li>interpreting whether it contains a Trend or any Seasonality.</li>
+</ul>
+<p>At this point, we also need to identify outliers and if they are significant for the overall analysis or whether they should be trimmed. It is also important to find any data that could be interpreted as “not applicable” which would also skew the analysis with erroneous results, for example, some data points may have “n/a”, “na”, or a blank/missing value while others may put a number or letter sequence that would not match with the rest of the data.</p>
+<p>These errors in the data may not be discovered until plotting results. Checking for linear relationships between two columns at a time may reveal mistakes in the data set or erroneous values. I was able to determine that several pairs of longitude and latitude points were incorrectly recorded based on a simple spatial mapping plot of longitude vs latitude. Since this is a collaborative effort with Dr.&nbsp;Schmutz (Professor of Earth and Environmental Science, UWF), he was notified so that he could make the decision to omit the data or correct it; negative signs were missing from the longitude data and he decided to correct them. We found that all erroneous temperature readings recorded from the buoy were the number ‘999’ and so this had to be filtered out too because the data would definitely be skewed.</p>
+</section>
+<section id="stationarity-of-data" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="stationarity-of-data"><span class="header-section-number">2.2.2</span> Stationarity of Data</h3>
+<p>3 rules for strict stationarity…</p>
+<p>Constant Mean - an upward or downward trend denotes that the series is not stationary.</p>
+<p>Constant Variance - the volatility of the spread of the data should stay consistent over the series. Increased deviations (fluctuations) from the average as the series progresses shows non-stationarity.</p>
+<p>Constant Autocorrelation - looking at time t and t-1 and the how they differ; the difference of the internal structure/statistical properties of the data should be constant and not significantly change over time.</p>
+<p>The Augmented Dickey-Fuller (ADF) Test shows whether the data is Stationary based on a resulting p-value. A Time Series Plot will confirm the p-value of the ADF.</p>
+</section>
+<section id="decomposition-determination" class="level3" data-number="2.2.3">
+<h3 data-number="2.2.3" class="anchored" data-anchor-id="decomposition-determination"><span class="header-section-number">2.2.3</span> Decomposition Determination</h3>
+<p>Classical Decomposition Methods comprise of the Additive method and the Multiplicative method.</p>
+<p>For additive decomposition, the magnitude of the seasonal fluctuations (or variation about the trend) are not expected to vary with the level of the time series as the data grows, or shrinks, over time. Essentially, we are assuming that there will be a constant absolute magnitude about which there will be seasonal fluctuations.</p>
+<p>An additive model’s graphical representation will show that there will be parallel peaks and troughs with a consistently even width between them, respectively, even though the overall graph may be showing a positive or negative correlation.</p>
+<p>The components (S,T,R) are proven to be independent by performing an additive decomposition and checking to see how R performs - if R (remainder/noise) remains fairly consistent, then an additive decomposition is needed; however, if R oscillates and increases in magnitude (and continues to do so) then the multiplicative decomposition has to be used.</p>
+<p><span class="math display">
+    y_t = S_t + T_t + R_t
+</span> where S=Seasonal, T=Trend, R=Residuals/Noise at time <em>t</em></p>
+<p>The multiplicative decomposition is used when the the magnitude of the seasonal fluctuations are proportional to the level of the time series. Essentially, there is a percentage change between the start and the end of each season and, as aforementioned, the residuals are checked for continually increasing oscillations.</p>
+<p><span class="math display">
+    y_t = S_t \times T_t \times R_t
+</span> The STL method in R used - Seasonal-Trend decomposition using Loess (Locally Estimated Scatterplot Smoothing) to show the breakdown of S, T and R.</p>
+<p>The Trend Strength, <span class="math inline">F_t</span>, is the comparison of Remainder (<span class="math inline">R_t</span>) versus the variance of the Data-without-Trend (<span class="math inline">T_t + R_t</span>) and how much data volatility there is in the long term. <span class="math display">
+F_m = max(0,1-[Var(R_t)/Var(m_t + R_t)])
+</span> The Seasonal Strength, <span class="math inline">F_s</span>, is the comparison of Remainder (<span class="math inline">Y_t</span>) versus the reduction in variance of the Seasonally-Adjusted data (<span class="math inline">S_t + R_t</span>) after the Trend has been removed. <span class="math display">
+F_s = max(0,1-[Var(R_t)/Var(s_t + R_t)])
+</span></p>
+</section>
+<section id="model-selection" class="level3" data-number="2.2.4">
+<h3 data-number="2.2.4" class="anchored" data-anchor-id="model-selection"><span class="header-section-number">2.2.4</span> Model Selection</h3>
+<ul>
+<li><p>SARIMAX (Seasonal Autoregressive Integrated Moving Average with an Exogenous Variable) is a comprehensive time series analysis that is a combination of seasonality, autoregression, differencing, moving average and is also a forecasting method that is well suited to a biological analysis. It is an extension of the ARIMA framework that incorporates the annual seasonality of biological data and the exogenous variable of water temperature. Also, like ARIMA, SARIMAX analysis data has to be proven stationary by testing its mean and variance to ensure that future predictions are based solidly on historical pattern recognition.</p>
+<ul>
+<li><p>The S (Seasonal) Component represents the regular intervals at which a relationship can be identified and is to be expected using biological data, i.e., finding the natural rythmn of nature.</p></li>
+<li><p>The AR (Autoregressive) Component, p, involves the model using the relationship of the variable with its own <strong>previous values</strong> (or lagged observations).</p></li>
+<li><p>The I (Integrated) Component, d, helps to <strong>stabilize the mean</strong> and remove trends from the time series analysis and makes it stationary by differencing (d).</p></li>
+<li><p>The MA (Moving Average) Component, q, represents the effect of <strong>previous error</strong> terms on the present value of the time series.</p></li>
+<li><p>The X (eXogenous) Component is an external variable that can help fill in the gaps of past behaviour of the data to soften fluctuations and strengthen future predictions. For this analysis, our exogenous variable is the Gulf of Mexico Surface Water Temperature.</p></li>
+<li><p>The SARIMAX model is mathematically represented using a Backshift (B) notation where <span class="math inline">By_t=y_{t-1}</span>:</p></li>
+</ul></li>
+</ul>
+<p><span class="math display">
+    \Phi_P(B^s)\phi_p(B)\nabla^d\nabla_s^Dy_t=\beta x_t+\Theta_Q (B^s)\theta_q(B)\epsilon_t
+</span></p>
+<p><strong>-</strong> <span class="math inline">y_t</span>: Dependent Variable, total nesting count</p>
+<p><strong>-</strong> <span class="math inline">x_t</span>: Exogenous Variable, surface water temperature</p>
+<p><strong>-</strong> <span class="math inline">\beta</span>: Coefficient, quantifies impact of water temperature on nesting activity</p>
+<p><strong>-</strong> <span class="math inline">\nabla^d</span> <strong>and</strong> <span class="math inline">\nabla_s^D</span>: Differencing Operators</p>
+<p><strong>-</strong> <span class="math inline">\phi_p</span> <strong>and</strong> <span class="math inline">\Phi_P</span>: AR(p) and SAR(P) Components</p>
+<p><strong>-</strong> <span class="math inline">\theta_q</span> <strong>and</strong> <span class="math inline">\Theta_Q</span>: MA(q) and SMA(Q) Components</p>
+<p><strong>-</strong> <span class="math inline">\epsilon_t</span>: White Noise (error term)</p>
+<ul>
+<li><p>Box-Jenkins time series method has three steps that the time series analysis can be run through iteratively.</p>
+<ul>
+<li><p>Step 1: <em>Identification</em> determines the order of the Seasonal and non-seasonal AR, I and MA components that are appropriate for the time series and where the eXogenous variable is incorporated. Within this step, there is a Stationarity Check for stability using the mean and variance of the model and this includes determining the Seasonal Stationarity. If there are significant fluntuations in the Mean (from analyzing the peaks and troughs), Seasonal Differencing(D) is needed as well as Standard Differencing (d). Next, the Autocorrelation and Partial Autocorrelation Analysis (ACF and PACF) plots are generated to identify model lags or Seasonal Spikes (most probably a multiple of 12). The spikes will be used to identify the Seasonal Autoregressive (P) and Seasonal Moving Average (Q). The Seasonality Check of the data is to confirm that there is a repeating 12-month pattern, or biological cycle where s=12, thus, validating the “S” component in SARIMAX. The relationship between the Exogenous Variable (X) and the time series nedds to be identified appropriately such that it is statistically relavent and aligned (may have to impose a lag) to the overall model and can help explain the model’s behaviour.</p></li>
+<li><p>Step 2: <em>Estimation</em> is where the a model is selected based on the identified seasonal and non-seasonal parameters <span class="math inline">(p, d, q)</span> x <span class="math inline">(P,D,Q)_s</span>. The AR and MA lags are also selected based on the ACF and PACF found in the previous identification step. The non-seasonal AR (<span class="math inline">\phi</span>) and MA coefficients (<span class="math inline">\theta</span>) will be designated as well as the seasonal AR (<span class="math inline">\Phi</span>) and MA (<span class="math inline">\Theta</span>) coefficients, if they exist. Lastly, for this step, the SARIMAX model’s exogenous variable coefficient (<span class="math inline">\beta</span>) can be estimated. All of thee parameters will be applied and the model generates the fitted values to synthesize its unique historical behavior and predictive nature while amalgamating its historic patterns with the exogenous temperature data. The Akaike Information Criterion (AIC) will be used to make a parsimonious model to ensure accuracy using as few parameters as possible - too many parameters can diminish the model’s optimization.</p></li>
+<li><p>Step 3: <em>Diagnostic Checking</em> involves investigating the residuals (the difference between the predicted SARIMAX values and observed data) to ensure no additional patterns are left in the error/residual terms; the residuals should resemble “white noise” randomness. Next, the Ljung-Box Test is utilized to check to see if the residuals are as desired, i.e., random, followed by a mean and variance check; the desired outcome is that the residuals have a mean close to zero and a variance that is constant (homoskedasticity) cofirming that the residuals do not grow or shrink over time. Also, the residuals are compared to the water temperature data to make sure that they do not correlate; if this is the case, its coefficient will have to be re-estimated. Finally, the term Iterative Refinement is used to describe the process for going back through the steps so far if the previous checks raised any issues.</p></li>
+</ul></li>
+<li><p>An ACF Plot will be generated to show the relationships within the data with respect to Seasonality and Non-stationary Trends. We will also be observing the prominence and regularity of the plot’s spikes, if the mean is shifting over time by analyzing the correlation between data and lags, and whether Differencing is required to achieve stationarity.</p></li>
+<li><p>A PACF Plot will be generated to determine the order of the standard AR (p) and the seasonal AR (P) via a “cut-off” point. A lag number will automatically be assigned for the SARIMAX model and the cut-off point should match this. This number is predicted to be 12 since we are looking at biological data. Therefore, we will be paying attention to whether the cut-off at the beginning of the plot is 12 which can lead to P being initially assigned a 1.</p></li>
+<li><p>The automatic base model for ARIMA that is used during programming is of the format: <span class="math display"> ARIMA(p,d,q)(P,D,Q)_{Lag}</span> but is written within the report as: <span class="math display"> SARIMAX(p,d,q)(P,D,Q)_{Lag}</span></p></li>
+</ul>
+</section>
+<section id="training-and-validation" class="level3" data-number="2.2.5">
+<h3 data-number="2.2.5" class="anchored" data-anchor-id="training-and-validation"><span class="header-section-number">2.2.5</span> Training and Validation</h3>
+<ul>
+<li><p>Based on my research, SARIMAX, Fourier series, and Prophet all handle non-linear, highly seasonal data well. “Neigbouring” of the SARIMAX model will be used to make sure that a slight adjustment will not provide a better model.</p>
+<ul>
+<li><p>SARIMAX uses lags to its advantage and assumes high correlation with the previous 12-month instance to its current observation. It utilizes the Seasonal Moving Average or Seasonal Autoregressive terms by “remembering” historical biological patterns and distinguishing between a surge or an anomaly by taking full advantage of the environmental influence, i.e., the exogenous variable, of water temperature.</p></li>
+<li><p>Fourier Series is used in combination with ARIMA to create a Dynamic Harmonic Regression model. The Dynamic attribute uses ARMA to handle errors or “memory” in the data. The harmonic attribute explains how it is an approximation model that breaks down the data into the sum of sine and cosine functions to handle the seasonality component to aid in mapping a predictable cycle. The Regression attribute refers to the exogenous data and handles piece-wise shifts in nesting activities. The Fourier Series allows for a relaxed approach to defining biological seasonal cycles and is an excellent choice for biological data.</p></li>
+<li><p>“Prophet” was designed by the Data Science Team at Meta to handle fluctuations of business and biological data within time series analysis. Prophet decomposes the time series model using a Generalized Additive Model, or GAM, y(t) by Trend, g(t), Seasonality, s(t), Holidays/Events (e.g, Environmental Disasters), h(t), and an Error term, <span class="math inline">\epsilon_t</span> - $ y(t)=g(t)+s(t)+h(t)+_t $ - it then looks at the series and adjusts curves to show the relationship rather than analyzing the actual relationship between the data points. Prophet is known to handle missing data, more resilient to outliers, and extra exogenous variables can be added. It also incorporates the Fourier Series for the Seasonal aspect to generate a smoothed seasonal cycle.</p></li>
+<li><p>“Neighboring”, or Stepwise Evaluation of Neighboring Parameters, can be used as a comparison to validate the correctness of the chosen model, e.g., changing p=0 (no immediate memory) to p=1 (1 month memory). Depending on what the SARIMAX model is, I will research what its “neighbor” should be and then test to make sure it is not better than the chosen model. There is also a balance to maintain between the simplicity and the accuracy of the model - one must use the fewest number of parameters to maintain the accuracy (parsimony).</p></li>
+</ul></li>
+<li><p>Note: Exponential Smoothing was considered but upon further research, it was not a good candidate because it can not handle the exogenous data well although it can generally handle outliers better than SARIMAX.</p></li>
+</ul>
+</section>
+<section id="metrics" class="level3" data-number="2.2.6">
+<h3 data-number="2.2.6" class="anchored" data-anchor-id="metrics"><span class="header-section-number">2.2.6</span> Metrics</h3>
+<ul>
+<li>AIC (Akaike Information Criterion) score: used to find the most parsimonious (efficient and simple) model from all of these methods; the lowest AIC score is usually the best but have to check the parameter count.</li>
+<li>“ma” coefficients: Moving Average coefficients are used to correct predictions from the previous point of the forecast, more likely to be a monthly forecast.</li>
+<li>“sma” coefficient: Seasonal Moving Average coefficients handles correcting predictions from the previous point of the forecast, more likely to be a yearly forecast.</li>
+<li>s.e. - Standard Error measures the reliability of ALL of the coefficients generated. As a rule, if the coefficient being compared is roughly double that of the standard error, the coefficient is deemed statistically significant corresponding to a <span class="math inline">p-value</span> of 0.05.</li>
+<li>sigma2 - <span class="math inline">\sigma^2</span> is the variance of the residuals, or remaining noise, in the model that can not be explained. A lower <span class="math inline">\sigma^2</span> suggests a better, tighter fit.<br>
+</li>
+<li>RMSE - Root Mean Squared Error is a measure of trust in the model’s predictions. It averages the distance between the model’s predictions against the original observed data. The RMSE will be in the same units as the data which, in our case, is number of nests.</li>
+</ul>
+</section>
+<section id="forecasting-and-residual-analysis" class="level3" data-number="2.2.7">
+<h3 data-number="2.2.7" class="anchored" data-anchor-id="forecasting-and-residual-analysis"><span class="header-section-number">2.2.7</span> Forecasting and Residual Analysis</h3>
+<ul>
+<li>Train and Test - we will use the first 21 years (1988-1999) of the data to develop the training model and the last year year of data will be used as the test set for each model’s forecasting capabilities. This is called the “Out-of-Sample Validation”.
+<ul>
+<li>Forecasting - this is a probabilistic estimate of what the future of the model will look like based on the patterns learned during training. Point Forecasts that offer its best estimate as to where future data points will reside in future months. Prediction Intervals consist of 80% and 95% uncertainty ranges that show the variability in nesting counts based on past learning of fluctuations or “environmental shocks”.</li>
+<li>Residual Analysis - after forecasting, the residuals behaviour will be compared to “White Noise” and will be verified using a Ljung-Box Test and a Residual Histogram to check for model bias and that the residuals are at a minimum.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="software-and-tools" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="software-and-tools"><span class="header-section-number">2.3</span> Software and Tools</h2>
+<ul>
+<li>R Programming Environment - widely used for time series analysis.</li>
+<li>fpp3 “Forecasting:Principles and Practice” meta-package.</li>
+<li>tsibble - creation and management of data frames.</li>
+<li>feasts - “Feature Extraction and Statistics for Time Series”, used for calculating the Ljung-Box p-value.</li>
+<li>fable - primary modeling entity for defining, estimating, and forecasting SARIMAX and Fourier ARIMA models.</li>
+<li>fable.prophet - to incorporate the Generalized Additive Model (GAM)</li>
+<li>STL method - Seasonal-Trend decomposition using Loess (Locally Estimated Scatterplot Smoothing).</li>
+</ul>
+</section>
+<section id="ethical-considerations" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="ethical-considerations"><span class="header-section-number">2.4</span> Ethical Considerations</h2>
+<p>Data integrity and Transparency</p>
+<p>Conservation Policies</p>
+<p>Sensitive Information/Species Protection</p>
+</section>
+</section>
+<section id="results" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Results</h1>
+<p>The analysis addresses the extent at which the nesting trends are changing with respect to:</p>
+<ul>
+<li>time</li>
+<li>water temperature (possible sex imbalance inference)</li>
+</ul>
+<section id="core-findings" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="core-findings"><span class="header-section-number">3.1</span> Core Findings</h2>
+<section id="exploratory-data-analysis-and-visualizations-1" class="level3" data-number="3.1.1">
+<h3 data-number="3.1.1" class="anchored" data-anchor-id="exploratory-data-analysis-and-visualizations-1"><span class="header-section-number">3.1.1</span> Exploratory Data Analysis and Visualizations</h3>
+<ul>
+<li><p>2017 had the highest number of nesting sites (see <a href="#fig-total-nesting-year" class="quarto-xref">Figure&nbsp;3</a>)</p></li>
+<li><p>Perdido Key had the most nesting sites (see <a href="#fig-beach-table" class="quarto-xref">Figure&nbsp;4</a>)</p></li>
+<li><p>July was the aggregated top month for nesting sites (see <a href="#fig-top-month" class="quarto-xref">Figure&nbsp;5</a>)</p></li>
+<li><p>The seasonality of the data can be observed in <a href="#tbl-CCseason-table" class="quarto-xref">Table&nbsp;3</a></p></li>
+<li><p>ANOVA results using Tukey Honest Significant Difference (HSD) or Comparison of the Means (95% confidence level) (see <a href="#tbl-buoy-tukey-table" class="quarto-xref">Table&nbsp;2</a>)</p></li>
+</ul>
+</section>
+<section id="stationarity-of-data-1" class="level3" data-number="3.1.2">
+<h3 data-number="3.1.2" class="anchored" data-anchor-id="stationarity-of-data-1"><span class="header-section-number">3.1.2</span> Stationarity of Data</h3>
+<ul>
+<li><p>Null Hypothesis, <span class="math inline">H_0</span>: The data is non-stationary and contains a unit root, p &lt; 0.05</p></li>
+<li><p>Alt. Hypothesis, <span class="math inline">H_1</span>: The data is stationary and does not contain a unit root, p &gt; 0.05</p></li>
+<li><p>The Augmented Dickey-Fuller Test reveals that p = 0.0868.</p></li>
+<li><p>Conclusion: We Fail to Reject the Null Hypothesis; <strong>the data is non-stationary</strong>.</p></li>
+</ul>
+<ul>
+<li>A Time Series Plot was configured and it showed that the Mean and Variance were NOT constant due to the peaks and valleys, i.e., confirming evidence that the data is Non-Stationary (see <a href="#fig-ts-plot" class="quarto-xref">Figure&nbsp;7</a> and <a href="#fig-centered-plot" class="quarto-xref">Figure&nbsp;8</a>).</li>
+</ul>
+</section>
+<section id="decomposition-determination-1" class="level3" data-number="3.1.3">
+<h3 data-number="3.1.3" class="anchored" data-anchor-id="decomposition-determination-1"><span class="header-section-number">3.1.3</span> Decomposition Determination</h3>
+<ul>
+<li>This is an example of Multiplicative Decomposition because the Residuals, or Remainder, (Y) are not constant over time and are larger as the number of nests increase showing that the seasonal variance is proportional to the trend. The Seasonal component shows a very regular pattern. The Trend is showing a slight upward relationship and could infer that conditions are becoming more favorable for nesting turtles. The trend has successfully captured the the full growth pattern of the data (including the notably large nesting month in 2017) and has ignored the month-to-month bumps. However, because the trend has a large bump, and not a completely horizontal line, shows the need for Differencing in the SARIMAX Model (see <a href="#fig-decomp-STL-plot" class="quarto-xref">Figure&nbsp;9</a>).</li>
+</ul>
+<ul>
+<li>The moderately high Trend Strength (0.5499, close to 0.6 minimum) aligns with having to use Differencing in the SARIMAX model. It also shows that there is a conservative long-term growth in turtle nests.</li>
+</ul>
+<ul>
+<li>The Strong Seasonal Strength (0.8087) shows that there is a highly predictable season and can be seen directly in <a href="#tbl-CCseason-table" class="quarto-xref">Table&nbsp;3</a>.</li>
+</ul>
+<ul>
+<li>There is Differencing Loss in the model. The use of the Seasonal Differencing (D=1) makes the model disregard the first 12 months of data since it has no previous time to compare with.</li>
+</ul>
+</section>
+<section id="model-selection-1" class="level3" data-number="3.1.4">
+<h3 data-number="3.1.4" class="anchored" data-anchor-id="model-selection-1"><span class="header-section-number">3.1.4</span> Model Selection</h3>
+<ul>
+<li>The ACF Plot shows that there is Seasonality in the data showing yearly peaks. There is a definite trend since the bars stay high and decrease slowly over all lags. This also shows that the mean is shifting over time and Differencing is required for SARIMAX modelling (see <a href="#fig-ACF-tpm" class="quarto-xref">Figure&nbsp;10</a>).</li>
+</ul>
+<ul>
+<li>The PACF determines the order of AR via a “cutoff” point. The cutoff point in the PACF plot is at the 12 month mark after which the spikes are in the “insignificant zone” and is akin to “white noise”. This shows there is no direct correlation with the data’s own past values at the same time of the year; therefore, p = 0 (see <a href="#fig-PACF-tpm" class="quarto-xref">Figure&nbsp;11</a>).</li>
+</ul>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Literature_Review_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>The resultant model is actually a <strong>SARIMAX</strong> model - Seasonal ARIMA with an eXogenous variable.</li>
+</ul>
+<p><span class="math display">
+    (1-B^{12})y_t=(1+\theta_1 B+ \theta_2 B^2)(1+\Theta_1 B^{12})\epsilon_t
+                 =(1+0.60B+ 0.14B^2)(1-0.70B^{12})\epsilon_t
+</span> <strong>-</strong> ma1 = 0.60 (s.e. = 0.062, significant since t ~ ma1 &gt; 2*se)</p>
+<p><strong>-</strong> ma2 = 0.14 (s.e. = 0.061, significant since ma2 &gt; 2*se)</p>
+<p><strong>-</strong> sma1 = -0.70 (s.e. = 0.055, significant since sma1 &gt;&gt; 2*se )</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Literature_Review_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><p>The ARMA, or Autoregression (AR) and Moving Average (MA), base accounts for zero AR terms and a two month MA. The AR is zero because of the strong seasonality of the model (PQ has more influence). Also, the exogenous surface water temperature shows that it holds the momentum of the monthly nesting activity.</p></li>
+<li><p>The S in SARIMA adds Seasonality to the ARIMA model; PQ defines the Seasonality of the model capturing the nesting cycle.</p></li>
+<li><p>The X in SARIMAX adds the exogenous (external) variable of Surface Water Temperature.</p></li>
+<li><p>The final SARIMAX equation is as follows:</p></li>
+</ul>
+<p><span class="math display"> SARIMAX(p,d,q)(P,D,Q)_{AnnualLag} = SARIMAX(0,0,2)(0,1,1)_{12} </span></p>
+<p>Note: Model was able to distinguish the change in nests numbers from month-to-month by correctly assigning a 12 month lag.</p>
+<ul>
+<li><p>Difference: <strong>d = 0</strong>, due to less relevant Trend Strength. The Differencing at a level 1 (d=1) for the dataset found in Stationarity of data section BUT dropped from the model because the Seasonal Differencing came from a much stronger value that proved to stabilize the mean. Over-differencing, i.e.&nbsp;having an unnecessary second level of differencing, can make a model less accurate.</p></li>
+<li><p>Seasonal Difference: <strong>D = 1</strong>, due to strong Seasonal Strength.</p></li>
+<li><p>Autoaggressive: <strong>p = 0</strong>, the number of nests found in one month does not have a ripple effect from the previous month possibly because turtles nest every two years (on average) and may not be the same set of turtles returning annually.</p></li>
+<li><p>Seasonal Autoaggressive: <strong>P = 0</strong>, the number of nests found in one season does not have a ripple effect from the previous season possibly because turtles nest every two years (on average) and may not be the same set of turtles returning annually.</p></li>
+<li><p>Moving Average: <strong>q = 2</strong>, the model has memory from the previous 2 months to adjust for the current month.</p></li>
+<li><p>Seasonal Moving Average: <strong>Q = 1</strong>, the model is able to adjust for inconsistencies in nest counts from last year to the current year’s prediction. Inconsistencies can arise from weather deviations and other environmental disasters like the Gulf oil spill of Summer, 2010.</p></li>
+<li><p>Checking Residuals(see <strong>?@fig-arima-fit-auto</strong>): shows the graphical representation of the residuals. The following analysis proves that the Auto-generated ARIMA can be considered an accurate representation of the model.</p>
+<ul>
+<li>The Innovation Residuals show that the minor “shock” fluctuations mostly remain around a zero-mean like ideal “White Noise”. The unexpected negative influence (significant innovation or “shock”) at the end of the system shows that the model was not expecting the lower nesting numbers. The equation below explains how the “shocks” that occur in the system are represented to account for unpredictable fluctuations after seasonal and trend instances have been accounted for.</li>
+</ul></li>
+</ul>
+<p><span class="math display">
+    \epsilon_t = y_t - E[y_t|PastInformation]
+</span></p>
+<ul>
+<li><p>Using the Ljung-Box Test (ACF Analysis), the lack of lag “protrusions” outside of the boundaries of the ACF of Residuals shows that the model contains most of the information from the data and what is left consists mostly of random noise. The model can be viewed as a success given that the spikes at 12 and 24 are within the “insignificant” zone. Also, the ACF plot confirms that the residuals are made up of white noise and are considered uncorrelated.</p></li>
+<li><p>The Residual Histogram (count vs residuals) shows that the residuals are centered about zero and follows a fairly normal (bell-shaped) distribution suggesting that the model is unbiased.</p></li>
+<li><p>In conclusion, the three plots encapsulate the idea that all available patterns have been captured. The residuals have shown to be uncorrelated and normally distributed allowing the confidence levels to expand over time at a realistic rate during extended forecasting (see <span class="citation" data-cites="arima-fit-auto">(<a href="#ref-arima-fit-auto" role="doc-biblioref"><strong>arima-fit-auto?</strong></a>)</span>).</p></li>
+</ul>
+</section>
+<section id="training-and-validation-1" class="level3" data-number="3.1.5">
+<h3 data-number="3.1.5" class="anchored" data-anchor-id="training-and-validation-1"><span class="header-section-number">3.1.5</span> Training and Validation</h3>
+<ul>
+<li><p>The base_sarimax and pdq_sarimax (has p-d-q-P-D-Q values hard-coded into its model) achieved the best overall performance with an Akaike Information Criterion (AIC) of 1544.76 for all data from 1988 to 2019 (see <a href="#fig-AIC" class="quarto-xref">Figure&nbsp;12</a> and <strong>?@fig-AIC-100</strong>). The data for 2020 is set aside to be used to evaluate the model’s performance on new unseen data. The negatively-influenced nesting season of 2020 will test the robustness of the model’s ability to forecast effectively and accurately.</p></li>
+<li><p>I ran both base_sarimax and pdq_sarimax to check that they had the same AIC result, then remove pdq_sarimax to simplify the table.</p></li>
+<li><p>Per the R-Studio-generated warning, “automatic selection does not select models with characteristic roots that may be numerically unstable”<span class="citation" data-cites="fpp3">(<a href="#ref-fpp3" role="doc-biblioref">Hyndman and Athanasopoulos 2026</a>)</span>. The base_arima with Box-Cox (lambda = 0, log transform), Fourier 1, Exponential Smoothing, GAMs, and Prophet could not predict a model because a small change in data could make the model unstable. R-Studio ignores the unstable models and will choose something more reliable that will work in the long-term.</p></li>
+</ul>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Top 3 Models based on AICc Score</caption>
+<colgroup>
+<col style="width: 23%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 21%">
+<col style="width: 19%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Model</th>
+<th style="text-align: center;">AIC</th>
+<th style="text-align: center;">AICc</th>
+<th style="text-align: center;">BIC</th>
+<th style="text-align: center;">Log Likelihood</th>
+<th style="text-align: center;">Sigma Squared</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">base_sarimax</td>
+<td style="text-align: center;">1544.76</td>
+<td style="text-align: center;">1544.93</td>
+<td style="text-align: center;">1558.82</td>
+<td style="text-align: center;">-768.38</td>
+<td style="text-align: center;">28.23</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">comp_pdq_sarimax</td>
+<td style="text-align: center;">1546.71</td>
+<td style="text-align: center;">1546.96</td>
+<td style="text-align: center;">1564.28</td>
+<td style="text-align: center;">-768.35</td>
+<td style="text-align: center;">28.33</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">fourier_sarimax_5</td>
+<td style="text-align: center;">1596.85</td>
+<td style="text-align: center;">1599.09</td>
+<td style="text-align: center;">1653.82</td>
+<td style="text-align: center;">-782.42</td>
+<td style="text-align: center;">25.32</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="forecasting" class="level3" data-number="3.1.6">
+<h3 data-number="3.1.6" class="anchored" data-anchor-id="forecasting"><span class="header-section-number">3.1.6</span> Forecasting</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Literature_Review_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Literature_Review_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="metrics-1" class="level3" data-number="3.1.7">
+<h3 data-number="3.1.7" class="anchored" data-anchor-id="metrics-1"><span class="header-section-number">3.1.7</span> Metrics</h3>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  .model       lb_stat lb_pvalue
+  &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;
+1 base_sarimax    16.3     0.755</code></pre>
+</div>
+</div>
+<p><span class="math display">
+  dof = TotalLags-(p+q+P+Q)=24-3
+</span></p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  .model         RMSE   MAE
+  &lt;chr&gt;         &lt;dbl&gt; &lt;dbl&gt;
+1 sarimax_train  3.11  1.89</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="visualization-and-tables" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="visualization-and-tables"><span class="header-section-number">3.2</span> Visualization and Tables</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-buoy-comp" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-buoy-comp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Literature_Review_files/figure-html/fig-buoy-comp-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-buoy-comp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Comparison of Three Temperature Buoys/deg.C
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div id="tbl-buoy-tukey-table" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-buoy-tukey-table-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: Tukey HSD Comparison of Mean Water Temperatures
+</figcaption>
+<div aria-describedby="tbl-buoy-tukey-table-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 28%">
+<col style="width: 26%">
+<col style="width: 17%">
+<col style="width: 17%">
+<col style="width: 10%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Comparison</th>
+<th style="text-align: right;">Difference (degC)</th>
+<th style="text-align: right;">Lower Bound</th>
+<th style="text-align: right;">Upper Bound</th>
+<th style="text-align: right;">p-adj</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">OB_Temp-NAS_Temp</td>
+<td style="text-align: right;">-0.0131</td>
+<td style="text-align: right;">-0.2010</td>
+<td style="text-align: right;">0.1748</td>
+<td style="text-align: right;">0.9854</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">South_Temp-NAS_Temp</td>
+<td style="text-align: right;">0.2141</td>
+<td style="text-align: right;">0.0262</td>
+<td style="text-align: right;">0.4020</td>
+<td style="text-align: right;">0.0207</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">South_Temp-OB_Temp</td>
+<td style="text-align: right;">0.2272</td>
+<td style="text-align: right;">0.0393</td>
+<td style="text-align: right;">0.4151</td>
+<td style="text-align: right;">0.0128</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-total-nesting-year" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-total-nesting-year-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Literature_Review_files/figure-html/fig-total-nesting-year-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-total-nesting-year-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Total Number of Loggerheads Nesting Sites/Year, 1998-2020
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div id="fig-beach-table" class="cell-output-display quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-beach-table-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table table-sm table-striped small">
+<caption>Area Totals of Loggerhead Nesting Sites: 1998-2020</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Nesting Area</th>
+<th style="text-align: center;">Total Nests</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Perdido Key</td>
+<td style="text-align: center;">366</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Santa Rosa Beach</td>
+<td style="text-align: center;">301</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Pensacola Beach</td>
+<td style="text-align: center;">278</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Fort Pickens</td>
+<td style="text-align: center;">243</td>
+</tr>
+</tbody>
+</table>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-beach-table-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Area Totals of Loggerhead Turtle Nesting Sites: 1998-2020
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-top-month" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-top-month-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Literature_Review_files/figure-html/fig-top-month-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-top-month-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Total Number of Loggerhead Nesting Sites/Month, 1998-2020
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div id="tbl-CCseason-table" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-CCseason-table-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3: Seasonal Start/End Dates and Total Number of Nesting Sites for Each Season: 1988-2020
+</figcaption>
+<div aria-describedby="tbl-CCseason-table-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Year</th>
+<th style="text-align: center;">Start Date</th>
+<th style="text-align: center;">End Date</th>
+<th style="text-align: center;">Total Sites</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1998</td>
+<td style="text-align: center;">1998-05-23</td>
+<td style="text-align: center;">1998-09-06</td>
+<td style="text-align: center;">49</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">1999</td>
+<td style="text-align: center;">1999-05-24</td>
+<td style="text-align: center;">1999-07-20</td>
+<td style="text-align: center;">56</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">2000</td>
+<td style="text-align: center;">2000-05-09</td>
+<td style="text-align: center;">2000-09-22</td>
+<td style="text-align: center;">65</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2001</td>
+<td style="text-align: center;">2001-05-27</td>
+<td style="text-align: center;">2001-08-12</td>
+<td style="text-align: center;">40</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">2002</td>
+<td style="text-align: center;">2002-05-03</td>
+<td style="text-align: center;">2002-08-12</td>
+<td style="text-align: center;">26</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2003</td>
+<td style="text-align: center;">2003-05-21</td>
+<td style="text-align: center;">2003-08-04</td>
+<td style="text-align: center;">49</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">2004</td>
+<td style="text-align: center;">2004-06-08</td>
+<td style="text-align: center;">2004-08-18</td>
+<td style="text-align: center;">38</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2005</td>
+<td style="text-align: center;">2005-06-04</td>
+<td style="text-align: center;">2005-08-11</td>
+<td style="text-align: center;">25</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">2006</td>
+<td style="text-align: center;">2006-05-25</td>
+<td style="text-align: center;">2006-08-07</td>
+<td style="text-align: center;">23</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2007</td>
+<td style="text-align: center;">2007-06-27</td>
+<td style="text-align: center;">2007-08-06</td>
+<td style="text-align: center;">13</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">2008</td>
+<td style="text-align: center;">2008-05-21</td>
+<td style="text-align: center;">2008-08-20</td>
+<td style="text-align: center;">39</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2009</td>
+<td style="text-align: center;">2009-05-18</td>
+<td style="text-align: center;">2009-08-21</td>
+<td style="text-align: center;">37</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">2010</td>
+<td style="text-align: center;">2010-06-07</td>
+<td style="text-align: center;">2010-08-05</td>
+<td style="text-align: center;">17</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2011</td>
+<td style="text-align: center;">2011-05-19</td>
+<td style="text-align: center;">2011-08-21</td>
+<td style="text-align: center;">74</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">2012</td>
+<td style="text-align: center;">2012-05-23</td>
+<td style="text-align: center;">2012-06-07</td>
+<td style="text-align: center;">7</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2013</td>
+<td style="text-align: center;">2013-05-11</td>
+<td style="text-align: center;">2013-08-14</td>
+<td style="text-align: center;">58</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">2014</td>
+<td style="text-align: center;">2014-05-20</td>
+<td style="text-align: center;">2014-08-30</td>
+<td style="text-align: center;">45</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2015</td>
+<td style="text-align: center;">2015-05-13</td>
+<td style="text-align: center;">2015-08-31</td>
+<td style="text-align: center;">68</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">2016</td>
+<td style="text-align: center;">2016-05-18</td>
+<td style="text-align: center;">2016-08-31</td>
+<td style="text-align: center;">101</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2017</td>
+<td style="text-align: center;">2017-05-16</td>
+<td style="text-align: center;">2017-09-05</td>
+<td style="text-align: center;">163</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">2018</td>
+<td style="text-align: center;">2018-05-19</td>
+<td style="text-align: center;">2018-08-11</td>
+<td style="text-align: center;">76</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2019</td>
+<td style="text-align: center;">2019-06-28</td>
+<td style="text-align: center;">2019-08-30</td>
+<td style="text-align: center;">48</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">2020</td>
+<td style="text-align: center;">2020-05-22</td>
+<td style="text-align: center;">2020-08-17</td>
+<td style="text-align: center;">70</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ind-plots" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ind-plots-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Literature_Review_files/figure-html/fig-ind-plots-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ind-plots-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Individual Plots for each Season: 1988-2020
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ts-plot" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ts-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Literature_Review_files/figure-html/fig-ts-plot-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ts-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Time Series Plot for Constant Mean and Variance
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-centered-plot" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-centered-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Literature_Review_files/figure-html/fig-centered-plot-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-centered-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: Centered Moving Average, 2x12
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-decomp-STL-plot" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-decomp-STL-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Literature_Review_files/figure-html/fig-decomp-STL-plot-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-decomp-STL-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: Decomposition of Turtle Nesting Data into Trend(m), Season(s), and Remainder(R)
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ACF-tpm" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ACF-tpm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Literature_Review_files/figure-html/fig-ACF-tpm-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ACF-tpm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10: ACF - Autocorrelation Function Plot”
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-PACF-tpm" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-PACF-tpm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Literature_Review_files/figure-html/fig-PACF-tpm-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-PACF-tpm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11: PACF - Partial Autocorrelation Function Plot”
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Literature_Review_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="model-performance-and-comparisons" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="model-performance-and-comparisons"><span class="header-section-number">3.3</span> Model Performance and Comparisons</h2>
+<p><strong>Model 1: Baseline Univariate ARIMA</strong> <strong>- looks at past nest counts</strong> <strong>- temperature included in model</strong></p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Series: total_per_month 
+Model: ARIMA(0,0,2)(0,1,1)[12] 
+
+Coefficients:
+         ma1     ma2     sma1
+      0.6001  0.1379  -0.6977
+s.e.  0.0621  0.0614   0.0547
+
+sigma^2 estimated as 27.48:  log likelihood=-790.03
+AIC=1588.06   AICc=1588.22   BIC=1602.24</code></pre>
+</div>
+</div>
+<div class="cell">
+<div id="fig-AIC" class="cell-output-display quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-AIC-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table table-sm table-striped small">
+<caption>Top 3 Models based on AICc Score</caption>
+<colgroup>
+<col style="width: 23%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 21%">
+<col style="width: 19%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Model</th>
+<th style="text-align: center;">AIC</th>
+<th style="text-align: center;">AICc</th>
+<th style="text-align: center;">BIC</th>
+<th style="text-align: center;">Log Likelihood</th>
+<th style="text-align: center;">Sigma Squared</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">base_sarimax</td>
+<td style="text-align: center;">1544.76</td>
+<td style="text-align: center;">1544.93</td>
+<td style="text-align: center;">1558.82</td>
+<td style="text-align: center;">-768.38</td>
+<td style="text-align: center;">28.23</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">comp_pdq_sarimax</td>
+<td style="text-align: center;">1546.71</td>
+<td style="text-align: center;">1546.96</td>
+<td style="text-align: center;">1564.28</td>
+<td style="text-align: center;">-768.35</td>
+<td style="text-align: center;">28.33</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">fourier_sarimax_5</td>
+<td style="text-align: center;">1596.85</td>
+<td style="text-align: center;">1599.09</td>
+<td style="text-align: center;">1653.82</td>
+<td style="text-align: center;">-782.42</td>
+<td style="text-align: center;">25.32</td>
+</tr>
+</tbody>
+</table>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-AIC-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12: Tabulated AIC of added ‘fit’ Diagnostics: 21 years of data
+</figcaption>
+</figure>
+</div>
+</div>
+<p>#| label: fig-AIC-100 #| fig-cap: “Tabulated AIC of added ‘fit’ Diagnostics: 22 years of data” kable_AIC_100</p>
+<p><strong>Model 2: ARIMAX</strong> <strong>- Dynamic Regression model</strong> <strong>- forecasting by responding to temperature</strong></p>
+<p>Nesting counts are DEPENDENT VARIABLE Water Temperature is EXOGENOUS REGRESSOR (xreg)</p>
+<p><span class="math display">
+  y_t=\beta(Temperature_t) +\eta_t
+</span> where <span class="math inline">\eta_t</span> is an ARIMA process part 1 - predict number of nests using temperature data part 2 - use ARIMA to take care of the rest?</p>
+</section>
+<section id="uncertainty-and-variability" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="uncertainty-and-variability"><span class="header-section-number">3.4</span> Uncertainty and Variability</h2>
+<p>TBD</p>
+</section>
+</section>
+<section id="discussion" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Discussion</h1>
+<section id="interpretation" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="interpretation"><span class="header-section-number">4.1</span> Interpretation</h2>
+<p>Notice the sharp downward spike in the remainder at the very end (late 2019/2020). This suggests that the actual nesting was much lower than the model expected for that time of year. This is a great point for your Discussion section—you can investigate if there was a late-season storm or a temperature drop that caused this deviation.</p>
+</section>
+<section id="limitations-and-challenges" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="limitations-and-challenges"><span class="header-section-number">4.2</span> Limitations and Challenges</h2>
+<p>No new data after 2020 available.</p>
+</section>
+<section id="implications" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="implications"><span class="header-section-number">4.3</span> Implications</h2>
+<p>The unbiased nature of the model is very important when used with respect to conservation efforts. Since the residuals are centered about zero, the model can estimate the population fairly accurately without over- or under-estimating. This provides a realistic baseline for the nesting activity of the Loggerhead Turtles resulting in informed protection efforts and more precise resource allocation along the Gulf Coast.</p>
+</section>
+</section>
+<section id="conclusion" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Conclusion</h1>
+<section id="conclusion-1" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="conclusion-1"><span class="header-section-number">5.1</span> Conclusion</h2>
+<p>TBD</p>
+</section>
+<section id="future-work" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="future-work"><span class="header-section-number">5.2</span> Future Work</h2>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">.model</th>
+<th style="text-align: center;">AIC</th>
+<th style="text-align: center;">AICc</th>
+<th style="text-align: center;">BIC</th>
+<th style="text-align: center;">sigma2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">base100_arima</td>
+<td style="text-align: center;">1588.06</td>
+<td style="text-align: center;">1588.22</td>
+<td style="text-align: center;">1602.24</td>
+<td style="text-align: center;">27.48</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">pdq100_arima</td>
+<td style="text-align: center;">1588.06</td>
+<td style="text-align: center;">1588.22</td>
+<td style="text-align: center;">1602.24</td>
+<td style="text-align: center;">27.48</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">comp_pdq100_arima</td>
+<td style="text-align: center;">1590.01</td>
+<td style="text-align: center;">1590.25</td>
+<td style="text-align: center;">1607.74</td>
+<td style="text-align: center;">27.58</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">fourier100_arima_5</td>
+<td style="text-align: center;">1642.51</td>
+<td style="text-align: center;">1644.68</td>
+<td style="text-align: center;">1699.97</td>
+<td style="text-align: center;">25.09</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">fourier100_arima_6</td>
+<td style="text-align: center;">1644.21</td>
+<td style="text-align: center;">1646.66</td>
+<td style="text-align: center;">1705.26</td>
+<td style="text-align: center;">25.16</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">fourier100_arima_4</td>
+<td style="text-align: center;">1645.99</td>
+<td style="text-align: center;">1647.65</td>
+<td style="text-align: center;">1696.26</td>
+<td style="text-align: center;">25.58</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">fourier100_arima_3</td>
+<td style="text-align: center;">1653.99</td>
+<td style="text-align: center;">1655.21</td>
+<td style="text-align: center;">1697.08</td>
+<td style="text-align: center;">26.38</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">fourier100_arima_2</td>
+<td style="text-align: center;">1686.34</td>
+<td style="text-align: center;">1687.19</td>
+<td style="text-align: center;">1722.25</td>
+<td style="text-align: center;">29.99</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ets100_model</td>
+<td style="text-align: center;">2487.98</td>
+<td style="text-align: center;">2490.43</td>
+<td style="text-align: center;">2549.03</td>
+<td style="text-align: center;">37.61</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Series: total_per_month 
+Model: ARIMA(0,0,2)(0,1,1)[12] 
+
+Coefficients:
+         ma1     ma2     sma1
+      0.6001  0.1379  -0.6977
+s.e.  0.0621  0.0614   0.0547
+
+sigma^2 estimated as 27.48:  log likelihood=-790.03
+AIC=1588.06   AICc=1588.22   BIC=1602.24</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Literature_Review_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Literature_Review_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Literature_Review_files/figure-html/unnamed-chunk-31-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>The model shows its robustness against “shocks” when we compare the partial dataset with the full dataset with an AIC difference of 44.</li>
+</ul>
+<p>The Final Forecast (Use 100% data) ARIMA(0,0,2)(0,1,1)[12] was proven to be the best model using your Test Set. Re-fit that exact same model using 100% of the data (all 22 years) to generate predictions for 2026.</p>
+</section>
+</section>
+<section id="notes" class="level1 unnumbered" data-number="6">
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">6 Notes</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-fpp3" class="csl-entry" role="listitem">
+Hyndman, Rob J., and George Athanasopoulos. 2026. <em>Forecasting: Principles and Practice</em>. <a href="https://otexts.com/fpp3/https://otexts.com/fpp3/">https://otexts.com/fpp3/https://otexts.com/fpp3/</a>.
+</div>
+<div id="ref-MathWorks" class="csl-entry" role="listitem">
+MathWorks. 2026. <span>“Time Series Analysis.”</span> 2026. <a href="https://www.mathworks.com/discovery/time-series-analysis.html">https://www.mathworks.com/discovery/time-series-analysis.html</a>.
+</div>
+<div id="ref-Mazaris2004" class="csl-entry" role="listitem">
+Mazaris, Matsinos, Kornaraki. 2004. <span>“Modeling the Effect of Sea Surface Temperature on Sea Turtle Nesting Activities by Investigating Seasonal Trends.”</span> <em>Natural Recourse Modeling</em>.
+</div>
+</div></section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
