@@ -35,6 +35,7 @@ knitr::opts_chunk$set(
 library(readxl)
 library(dplyr)
 library(knitr)
+library(kableExtra)
 library(ggplot2)   
 library(lubridate)
 library(fpp3)
@@ -48,6 +49,8 @@ library(itsmr)
 library(slider)
 library(broom)
 library(fable.prophet)
+library(gt)
+library(patchwork)
 ```
 
 ```{r}
@@ -61,21 +64,16 @@ data$Species <- toupper(data$Species)
 #combine the date (C_Date) so R can identify and use standard library functions for TSA
 data <- data %>%
   mutate(C_Date = dmy(paste(Date, Year, sep = "-"))) %>%
-  mutate(Month = month(C_Date, label = TRUE, abbr = FALSE),
-         Year = year(C_Date))
+  mutate(Month = month(C_Date, label = TRUE, abbr = FALSE), Year = year(C_Date))
 ```
 
 ```{r}
 
 temp_data <- "PENSACOLA SOUTH WATER TEMP.xlsx"
-
 nas_temp_data <- "PNS_NAS.xlsx"
-
-#pcb_temp_data <- "PCB_050608.xlsx"
-
 ob_temp_data <- "ORANGE BEACH WATER TEMP.xlsx"
 
-################################################################################
+###############################################################################
 
 years <- excel_sheets(temp_data)
 
@@ -84,25 +82,19 @@ all_years <- lapply(years, function(x) read_excel(temp_data, sheet = x))
 column_conversions <- map(years, ~{ #get rid of white space and make all column headers lower case
     read_excel(temp_data, sheet = .x) %>%
     rename_with(~tolower(trimws(.x))) %>%
-    mutate(yyyy = as.numeric(yy),
-           mm = as.numeric(mm),
-           dd = as.numeric(dd),
-           hh = as.numeric(hh),
+    mutate(yyyy = as.numeric(yy), mm = as.numeric(mm),
+           dd = as.numeric(dd), hh = as.numeric(hh),
            yyyy = ifelse(yyyy < 99, yyyy + 1900, yyyy),# sheet 1998 had its year written as 98
-           C_Date = make_date(yyyy, mm, dd))
-  })
+           C_Date = make_date(yyyy, mm, dd))})
+
 wtmp_data <- map(column_conversions, ~{ .x %>%
                 filter(wtmp < 90) %>%
                 filter(hh == 15) %>% #filter out the 1st hour 15 of each day - the temp at 3pm daily
                 group_by(C_Date) %>%
                 slice(1) %>%
-                ungroup()
-  })
+                ungroup()})
 
-wtmp_select_data <- map(wtmp_data, ~{ .x %>%
-                                    select(C_Date, wtmp)
-                                    
-})
+wtmp_select_data <- map(wtmp_data, ~{ .x %>% select(C_Date, wtmp)})
 
 wtmp_all_sheets <- bind_rows(wtmp_select_data)
 
@@ -120,24 +112,19 @@ all_nas_years <- lapply(nas_years, function(x) read_excel(nas_temp_data, sheet =
 column_conversions <- map(nas_years, ~{ #get rid of white space and make all column headers lower case
     read_excel(nas_temp_data, sheet = .x) %>%
     rename_with(~tolower(trimws(.x))) %>%
-    mutate(yyyy = as.numeric(yy),
-           mm = as.numeric(mm),
-           dd = as.numeric(dd),
-           hh = as.numeric(hh),
-           C_Date = make_date(yyyy, mm, dd))
-  })
+    mutate(yyyy = as.numeric(yy), mm = as.numeric(mm),
+           dd = as.numeric(dd), hh = as.numeric(hh),
+           C_Date = make_date(yyyy, mm, dd))})
+
 nas_tmp_data <- map(column_conversions, ~{ .x %>%
                 filter(wtmp < 90) %>% #filter out erroneous temp readings
                 filter(hh == 15) %>% #filter out the 1st hour 15 of each day - the temp at 3pm daily
                 group_by(C_Date) %>%
                 slice(1) %>%
-                ungroup()
-  })
-
+                ungroup()})
 
 nas_tmp_select_data <- map(nas_tmp_data, ~{ .x %>%
-                                    select(C_Date, wtmp)
-})
+                                    select(C_Date, wtmp)})
 nas_tmp_all_sheets <- bind_rows(nas_tmp_select_data)
 
 nas_tmp_all_sheets <- nas_tmp_all_sheets %>%
@@ -145,33 +132,28 @@ nas_tmp_all_sheets <- nas_tmp_all_sheets %>%
                       rename('NAS_Temp' = wtmp) %>%
                       drop_na()
 
-################################################################################
+###############################################################################
 
 ob_years <- excel_sheets(ob_temp_data)
 
-all_ob_years <- lapply(ob_years, function(x) read_excel(ob_temp_data, sheet = x))
-
+all_ob_years <- lapply(ob_years, function(x) read_excel(ob_temp_data, 
+                                                        sheet = x))
 column_conversions <- map(ob_years, ~{ #get rid of white space and make all column headers lower case
     read_excel(ob_temp_data, sheet = .x) %>%
     rename_with(~tolower(trimws(.x))) %>%
-    mutate(yyyy = as.numeric(yy),
-           mm = as.numeric(mm),
-           dd = as.numeric(dd),
-           hh = as.numeric(hh),
-           C_Date = make_date(yyyy, mm, dd))
-  })
+    mutate(yyyy = as.numeric(yy), mm = as.numeric(mm),
+           dd = as.numeric(dd), hh = as.numeric(hh),
+           C_Date = make_date(yyyy, mm, dd))})
+
 ob_tmp_data <- map(column_conversions, ~{ .x %>%
                 filter(wtmp < 90) %>% #filter out erroneous temp readings
                 filter(hh == 15) %>% #filter out the 1st hour 15 of each day - the temp at 3pm daily
                 group_by(C_Date) %>%
                 slice(1) %>%
-                ungroup()
-  })
+                ungroup()})
 
+ob_tmp_select_data <- map(ob_tmp_data, ~{ .x %>% select(C_Date, wtmp)})
 
-ob_tmp_select_data <- map(ob_tmp_data, ~{ .x %>%
-                                    select(C_Date, wtmp)
-})
 ob_tmp_all_sheets <- bind_rows(ob_tmp_select_data)
 
 ob_tmp_all_sheets <- ob_tmp_all_sheets %>%
@@ -179,7 +161,7 @@ ob_tmp_all_sheets <- ob_tmp_all_sheets %>%
                       rename('OB_Temp' = wtmp) %>%
                       drop_na()
 
-################################################################################
+###############################################################################
 
 # Joining all three temps by Date
 all_temp_data <- sth_tmp_all_sheets %>%
@@ -187,18 +169,15 @@ all_temp_data <- sth_tmp_all_sheets %>%
   left_join(nas_tmp_all_sheets, by = "C_Date") %>%
   drop_na()
 
-################################################################################
+###############################################################################
 
 # Combine the temperatures
 pivot_temp <- all_temp_data %>%
-  pivot_longer(
-    cols = c(South_Temp, OB_Temp, NAS_Temp), 
-    names_to = "Buoys", 
-    values_to = "Temp_Reading"
-  ) %>%
+  pivot_longer(cols = c(South_Temp, OB_Temp, NAS_Temp), 
+               names_to = "Buoys", 
+               values_to = "Temp_Reading") %>%
   drop_na(Temp_Reading)
 ```
-
 
 ```{r}
 
@@ -229,19 +208,14 @@ map_points <- all_data %>%
 spatial_plot <- ggplot(map_points, aes(x = Longitude, y = Latitude, color = Location)) +
   geom_point(size = 5, alpha = 0.7) +
   theme_minimal() +
-  labs(
-    title = "Spatial Mapping of Loggerhead Nesting Sites",
-    subtitle = "Coordinates for Perdido Key, Fort Pickens, Pensacola Beach, and Santa Rosa Beach",
-    x = "Longitude (Dec. Degrees)",
-    y = "Latitude (Dec. Degrees)"
-  ) +
+  labs(title = "Spatial Mapping of Loggerhead Nesting Sites",
+       subtitle = "Coordinates for Perdido Key, Fort Pickens, Pensacola Beach, and Santa Rosa Beach",
+       x = "Longitude (Dec. Degrees)", y = "Latitude (Dec. Degrees)") +
   annotate("point", x = -86.007, y = 28.787, color = "red", size = 3) +
   annotate("text", x = -86.007, y = 28.787, label = "Station 42039", vjust = -1) +
-  theme(
-    plot.title = element_text(hjust = 0.5),
-    plot.subtitle = element_text(hjust = 0.5),
-    legend.position = "none" # Hidden because points are labeled directly
-  )
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5),
+        legend.position = "none") # Hidden because points are labeled directly
 ```
 
 ```{r}
@@ -255,11 +229,9 @@ kable_table_beaches <- all_data %>%
                                "SR" ~ "Santa Rosa Beach")) %>%
   count(Location, name = "Number of Nests") %>% #descending order
   arrange(desc(`Number of Nests`)) %>%
-  kable(
-    caption = "Area Totals of Loggerhead Nesting Sites: 1998-2020",
-    col.names = c("Nesting Area", "Total Nests"),
-    align = "lc"
-  )
+  kable(caption = "Area Totals of Loggerhead Nesting Sites: 1998-2020",
+        col.names = c("Nesting Area", "Total Nests"),
+        align = "lc")
 ```
 
 ```{r}
@@ -298,11 +270,11 @@ overlay_plot <- ggplot() +
   geom_line(data = trends, 
             aes(x = Month, y = NestsPerMonth, group = YearFactored, color = YearFactored),
                 linewidth = 0.95, alpha = 0.5,
-            na.rm = TRUE) +
+                na.rm = TRUE) +
   geom_line(data = trend_avg, 
             aes(x = Month, y = Nests_avg, group = 1),
                 color = "black", alpha = 1,
-            na.rm = TRUE) +
+                na.rm = TRUE) +
   geom_point(data = trend_avg, 
              aes(x= Month, y = Nests_avg), 
              color = "black", size = 1,
@@ -338,7 +310,7 @@ ind_plots <- ggplot(monthly_cnts_ind, aes(x = Month, y = Ttl_Nests, group = Year
        subtitle = "Data aggregated across all four study sites",
        x = "Month",
        y = "Number of Nests") +
-      scale_x_discrete(limits = c("May", "June", "July", "August", "September")) +
+  scale_x_discrete(limits = c("May", "June", "July", "August", "September")) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 0.6), axis.text.y = element_text(hjust = 0.5))
 ```
@@ -347,12 +319,9 @@ ind_plots <- ggplot(monthly_cnts_ind, aes(x = Month, y = Ttl_Nests, group = Year
 buoy_comp <- ggplot(pivot_temp, aes(x = C_Date, y = Temp_Reading, color = Buoys)) +
   geom_line(alpha = 0.5) +  # Alpha makes it easier to see where lines overlap
   theme_minimal() +
-  labs(
-    title = "Comparison of Three Temperature Buoys/deg.C",
-    subtitle = " in the Gulf of Mexico",
-    x = "Date",
-    y = "Temperature (°C)"
-  ) +
+  labs(title = "Comparison of Three Temperature Buoys/deg.C",
+       subtitle = " in the Gulf of Mexico",
+       x = "Date", y = "Temperature (°C)") +
   scale_color_brewer(palette = "Set1")
 ```
 
@@ -369,21 +338,20 @@ tukey_res <- TukeyHSD(anova_summary)
 
 buoy_tukey_table <- tidy(tukey_res) %>%
   filter(term == "Buoys") %>% # Buoy comparison
-  select(
-    Comparison = contrast,
-    `Difference (degC)` = estimate,
-    `Lower Bound` = conf.low,
-    `Upper Bound` = conf.high,
-    `p-adj` = adj.p.value
-  ) %>%
+  select(Comparison = contrast,
+        `Difference (degC)` = estimate,
+        `Lower Bound` = conf.low,
+        `Upper Bound` = conf.high,
+        `p-adj` = adj.p.value) %>%
   mutate(across(where(is.numeric), ~ round(., 4)))
 ```
+
 
 # Introduction
 
 ## Problem Definition
 
-The goal of this project is to use Time Series Analysis to evaluate the seasonality of Loggerhead Turtle nesting habits, specifically, how predictable are the seasonal dates as to when turtle nesting season begins and ends as well as evaluating the influence of other environmental factors like water temperature. 
+The goal of this project is to use Time Series Analysis to evaluate the seasonality of Loggerhead Turtle nesting habits, specifically, how predictable are the seasonal dates as to when turtle nesting season begins and ends as well as evaluating the influence of other environmental factors like water temperature. I will also track the outside influence, sea surface water temperature,  to observe how it behaves before integrating into a model with the nesting activity.
 
 Time Series Analysis can be used for this experiment because of its associated 'time stamp' - a previous value can be compared with a present value and, is in turn, used to predict a future value for a particular time period, or forecasting based on comparable past data.  
 
@@ -396,6 +364,7 @@ Our interdisciplinary team presented this study so that I could be part of a res
 
 The results generated by this study will help local environmentalists with their conservation activities to aid the safe and successful nesting of Loggerhead Turtles in our area.
 
+
 ## Loggerhead "Turtle Tangent" [Florida Fish and Wildlife Conservation Commision]
 
 - Threatened Species (at the State and Federal Level)
@@ -404,44 +373,52 @@ The results generated by this study will help local environmentalists with their
 - average of 4 nests created each season per female turtle with one being created about every 14 days
 - Florida is host to about 100,000 nests each year (Brevard and Palm Beach counties account for about 50,000)
 
+
 ## Context and Background
 
 A Time Series Analysis was suggested to be the best approach when looking at the research Problem Definition, particularly the seasonal aspect of the beginning and end of the annual nesting period. The methodology of the Time Series Analysis is broken down into steps that can be iterative in nature depending on the results from each step. These steps include exploring the data and possible relationships; examining the stationarity of data; determining which decomposition method will be used (additive or multiplicative); selecting a model to "capture underlying data patterns based on characteristics such as seasonality, trend, and stationarity" [@MathWorks]; the training and validation of the model; assessing the resulting metrics, forecast outcomes and consequential residuals. Since this is a study on Biological Data, it is will likely result in a strong seasonal model; therefore, non-linear models will suit the data more consistently, for example, ARIMA model with a suitable "fit" enhancement.
 
+
 ## Objectives and Goals
 
-TBD
+We will perform the analysis and connect our findings with real-world issues.
+
 
 ## Summary of Approach
 
-- Acquire and Clean Data
+- **Acquire and Clean Data**
+  - Creating new tables from raw data
+  - Merging and Formatting of the final data set
 
-- Exploratory Data Analysis and Visualizations
+- **Exploratory Data Analysis and Visualizations**
   - Investigating variable relationships
   
-- Stationarity of Data
+- **Stationarity of Data**
   - Testing for Constant Mean, Variance, Autocorrelation
   - Time Series Plot - Visual Verification
   - ADF - Augmented Dickey-Fuller Test (Unit Root Test) - Statistical Verification
   
-- Decomposition Determination
+- **Decomposition Determination**
   - Additive or Multiplicative
   - Interpreting Season/Trend/Residuals (STL - Seasonal-Trend decomposition using Loess)
   - Strength of Trend and Seasonality
   
-- Model Selection
+- **Model Parameter Selection**
   - PACF & ACF - Partial and Autocorrelation Function (Plot) - Visual Verification
   - Determining p, q, d, P, Q, D
   - Define the model e.g., ARMA, ARIMA, SARIMA, etc
   
-- Training and Validation
-  - Box-Cox Transformation, LOESS Smoothing, Fourier Transform, Neighbor Test, Exponential Smoothing, Prophet, GAMs options
+- **Training and Validation**
+  - Experimenting with different models
+  - Box-Cox Transformation, LOESS Smoothing, Fourier Transform, Neighbor Test, Exponential Smoothing, Prophet, GAMs
+  - AICc metric determines best model
+  
+- **Metrics**
   - Holt-Winters model (RMSE) for metric comparison
+  - RMSE, MAE
 
-- Metrics
-  - RMSE
-
-- Forecasting and Residual Analysis
+- **Forecasting and Residual Analysis**
+  - Forecasting to 2026
 
 
 # Methods
@@ -465,14 +442,16 @@ Although 4 turtle species were identified in the study, our primary focus was on
 
 ```{r}
 #| label: tbl-CCdata-table
-#| tbl-cap: "Data Table (with Surface Water Temperature added) of the Nesting Habits of Loggerhead Turtles: 1988-2020"
+#| tbl-cap: "Data Table (with Surface Water Temperature) of the Nesting Habits of Loggerhead Turtles: 1988-2020 (Partial)"
 #| echo: false
 kable_table_CConly
 ```
 
-### Additional Data
+
+## Additional Data
 
 Our team was influenced by the initial literary review [@Mazaris2004] where temperature data also collected and Dr. Schmutz found that there are many buoys in the region of study along the Gulf Coast. He picked two buoys (42012 and 42028) and I was tasked to look at their data and pair temperature data with the dates of new nest discovery. Unfortunately, the data sets were incomplete in that the temperature data did not go back 22 years for either buoy. I was able to look further and found Station 42039 further out into the Gulf. Station 42028 was dropped from the set of stations since there was too little data; the other three stations were compared with each other to make sure we could use Station 42039.
+
 
 ### Buoy Coordinates and Data Sample Sizes
 
@@ -495,7 +474,6 @@ Station 42012, PCLF1, and 42039 were compared and the results proved that we wou
 |42039 vs 42012| = 0.227 degrees Celsius
 
 These result cemented the conclusion that Station 42039 could be used even though it was located further away from the Gulf coastline where the turtles nest (see @fig-spatial and @fig-buoy-comp) and a snippet of the final dataset is shown in @tbl-CCdata-table.
-
 ```{r}
 #| label: fig-spatial
 #| fig-cap: Spatial Mapping Of Loggerhead Nesting Sites including Station 42039 Buoy Location
@@ -514,6 +492,7 @@ Overall, Time Series Analysis is a layered methodology where each layer can stre
 - Training and Validation
 - Metrics
 - Forecasting and Residual Analysis
+
 
 ###  Exploratory Data Analysis and Visualizations
 
@@ -539,7 +518,6 @@ Constant Variance - the volatility of the spread of the data should stay consist
 Constant Autocorrelation - looking at time t and t-1 and the how they differ; the difference of the internal structure/statistical properties of the data should be constant and not significantly change over time.
 
 The Augmented Dickey-Fuller (ADF) Test shows whether the data is Stationary based on a resulting p-value. A Time Series Plot will confirm the p-value of the ADF.
-
 ```{r}
 # Found Duplicate Dates
 #turtle_tsibble <- all_data %>%
@@ -579,7 +557,41 @@ kable_table_season_dates <- season_listing %>%
   kable(
     col.names = c("Year", "Start Date", "End Date", "Total Sites"),
     align = "cccc")
+
+SARIMAX_table <- all_data %>%
+  # filter for loggerhead species only
+  filter(Species == "CC") %>%
+  # filter out 999 temps
+  filter(`Water Temp.` != 999) %>%
+  # create a monthly index
+  mutate(Month_Index = month(C_Date),
+         Year_Month = yearmonth(C_Date)) %>%
+  # aggregate nests & average the temp
+  group_by(Year_Month) %>%
+  summarise(total_per_month = n(),
+            avg_water_temp = mean(`Water Temp.`, na.rm = TRUE)) %>%
+  as_tsibble(index = Year_Month) %>%
+  fill_gaps(total_per_month = 0) %>%
+  mutate(avg_water_temp = zoo::na.approx(avg_water_temp, na.rm = FALSE)) %>%
+  tidyr::fill(avg_water_temp, .direction = "downup") %>%
+  filter_index("1998 Jan" ~ "2020 Dec") %>%
+  mutate(temp_scaled = (avg_water_temp - mean(avg_water_temp, 
+                        na.rm = TRUE)) / sd(avg_water_temp, na.rm = TRUE))
+
+Relative_Nest_vs_Temp <- SARIMAX_table %>%
+  ggplot(aes(x = Year_Month)) +
+  # Plot Nesting (Scaled for visual match)
+  geom_line(aes(y = total_per_month / max(total_per_month), color = "Nesting (Normalized)"), size = 0.75) +
+  geom_line(aes(y = temp_scaled, color = "Temperature (Scaled)"), size = 0.75, linetype = "dashed") +
+  scale_color_manual(values = c("Nesting (Normalized)" = "black", "Temperature (Scaled)" = "#f03b20")) +
+  labs(title = "Nesting Activity vs. Water Temperature Over Time",
+       subtitle = " - All Beaches, 1998 - 2020",
+       x = "Year",
+       y = "Relative Intensity",
+       color = "Variable") +
+  theme_minimal()
 ```
+
 
 ### Decomposition Determination
 
@@ -595,7 +607,6 @@ $$
     y_t = S_t + T_t + R_t 
 $$
 where S=Seasonal, T=Trend, R=Residuals/Noise at time _t_
-
 
 The multiplicative decomposition is used when the the magnitude of the seasonal fluctuations are proportional to the level of the time series. Essentially, there is a percentage change between the start and the end of each season and, as  aforementioned, the residuals are checked for continually increasing oscillations.
 
@@ -613,15 +624,16 @@ $$
 F_s = max(0,1-[Var(R_t)/Var(s_t + R_t)])
 $$
 
+
 ### Model Selection
 
 -   SARIMAX (Seasonal Autoregressive Integrated Moving Average with an Exogenous Variable) is a comprehensive time series analysis that is a combination of seasonality, autoregression, differencing, moving average and is also a forecasting method that is well suited to a biological analysis. It is an extension of the ARIMA framework that incorporates the annual seasonality of biological data and the exogenous variable of water temperature. Also, like ARIMA, SARIMAX analysis data has to be proven stationary by testing its mean and variance to ensure that future predictions are based solidly on historical pattern recognition. 
     
-    -   The S (Seasonal) Component represents the regular intervals at which a relationship can be identified and is to be expected using biological data, i.e., finding the natural rythmn of the model.
+    -   The S (Seasonal) Component represents the **regular intervals** at which a relationship can be identified and is to be expected using biological data, i.e., finding the natural rythmn of the model.
     -   The AR (Autoregressive) Component, p, involves the model using the relationship of the variable with its own **previous values** (or lagged observations).
     -   The I (Integrated) Component, d, helps to **stabilize the mean** and remove trends from the time series analysis and makes it stationary by differencing (d).
     -   The MA (Moving Average) Component, q, represents the effect of **previous error** terms on the present value of the time series.
-    -   The X (eXogenous) Component is an external variable that can help fill in the gaps of past behaviour of the data to soften fluctuations and strengthen future predictions. For this analysis, our exogenous variable is the Gulf of Mexico Surface Water Temperature.
+    -   The X (eXogenous) Component is an **external variable** that can help fill in the gaps of past behaviour of the data to soften fluctuations and strengthen future predictions. For this analysis, our exogenous variable is the Gulf of Mexico Surface Water Temperature.
     
     -   The SARIMAX model is mathematically represented using a Backshift (B) notation where $By_t=y_{t-1}$:
     
@@ -642,7 +654,6 @@ $$
 **-**  $\theta_q$ **and** $\Theta_Q$: MA(q) and SMA(Q) Components  
 
 **-**  $\epsilon_t$: White Noise (error term)
-
 
 -   Box-Jenkins time series method has three steps that the time series analysis can be run through iteratively.
 
@@ -668,6 +679,7 @@ $$ ARIMA(p,d,q)(P,D,Q)_{Lag}$$
 but is written within the report as:
 $$ SARIMAX(p,d,q)(P,D,Q)_{Lag}$$
 
+
 ### Training and Validation
 
 - Based on my research, SARIMAX, Fourier series, and Prophet all handle non-linear, highly seasonal data well. "Neigbouring" of the SARIMAX model will be used to make sure that a slight adjustment will not provide a better model. 
@@ -678,9 +690,10 @@ $$ SARIMAX(p,d,q)(P,D,Q)_{Lag}$$
   
   - "Prophet" was designed by the Data Science Team at Meta to handle fluctuations of business and biological data within time series analysis. Prophet decomposes the time series model using a Generalized Additive Model, or GAM, y(t) by Trend, g(t), Seasonality, s(t), Holidays/Events (e.g, Environmental Disasters), h(t), and an Error term, $\epsilon_t$ - $ y(t)=g(t)+s(t)+h(t)+\epsilon_t $ - it then looks at the series and adjusts curves to show the relationship rather than analyzing the actual relationship between the data points. Prophet is known to handle missing data, more resilient to outliers, and extra exogenous variables can be added. It also incorporates the Fourier Series for the Seasonal aspect to generate a smoothed seasonal cycle. 
   
-  - "Neighboring", or Stepwise Evaluation of Neighboring Parameters, can be used as a comparison to validate the correctness of the chosen model, e.g., changing p=0 (no immediate memory) to p=1 (1 month memory). Depending on what the SARIMAX model is, I will research what its "neighbor" should be and then test to make sure it is not better than the chosen model. There is also a balance to maintain between the simplicity and the accuracy of the model - one must use the fewest number of parameters to maintain the accuracy (parsimony).
+  - "Neighboring", or Stepwise Evaluation of Neighboring Parameters, can be used as a comparison to validate the correctness of the chosen model, e.g., changing p=0 (no immediate memory) to p=1 (1 month memory). Depending on what the SARIMAX model is, I will research what its "neighbor" should be and then test to make sure it is not better than the chosen model. There is also a balance to maintain between the simplicity and the accuracy of the model - one make the model as parsimonious as possible with the fewest number of parameters whilst maintaining accuracy.
 
 - Note: Exponential Smoothing was considered but upon further research, it was not a good candidate because it can not handle the exogenous data well although it can generally handle outliers better than SARIMAX.
+
 
 ### Metrics
 
@@ -708,6 +721,7 @@ $$ SARIMAX(p,d,q)(P,D,Q)_{Lag}$$
 - fable.prophet - to incorporate the Generalized Additive Model (GAM)
 - STL method - Seasonal-Trend decomposition using Loess (Locally Estimated Scatterplot Smoothing).
 
+
 ## Ethical Considerations
 
 Data integrity and Transparency
@@ -716,6 +730,7 @@ Conservation Policies
 
 Sensitive Information/Species Protection
 
+
 # Results
 
 The analysis addresses the extent at which the nesting trends are changing with respect to:
@@ -723,149 +738,191 @@ The analysis addresses the extent at which the nesting trends are changing with 
 -   time
 -   water temperature (possible sex imbalance inference)
 
+
 ## Core Findings
 
 ###  Exploratory Data Analysis and Visualizations
 
   - 2017 had the highest number of nesting sites (see @fig-total-nesting-year)
-
   - Perdido Key had the most nesting sites (see @fig-beach-table) 
-
   - July was the aggregated top month for nesting sites (see @fig-top-month)
-  
-  - The seasonality of the data can be observed in @tbl-CCseason-table
+  - The seasonality of the data can be observed (see@tbl-CCseason-table)
+  - ANOVA results using Tukey Honest Significant Difference (HSD) or Comparison of the Means (95% confidence level), (see @tbl-buoy-tukey-table)
+  - Relative Relationship between Nesting Activity and Average monthly temperatures show a high correlation (see @fig-relative-nest-temp).
 
-  - ANOVA results using Tukey Honest Significant Difference (HSD) or Comparison of the Means (95% confidence level) (see @tbl-buoy-tukey-table)
 
 ### Stationarity of Data
 
-  - Null Hypothesis, $H_0$: The data is non-stationary and contains a unit root, 
-    p < 0.05
-  - Alt. Hypothesis, $H_1$: The data is stationary and does not contain a unit root,
-    p > 0.05
-    
-  - The Augmented Dickey-Fuller Test reveals that p = 0.0868.
+  - Null Hypothesis, $H_0$: The data is non-stationary and contains a unit root, p < 0.05
   
-  - Conclusion: We Fail to Reject the Null Hypothesis; **the data is non-stationary**.
+  - Alt. Hypothesis, $H_1$: The data is stationary and does not contain a unit root, p > 0.05
+    
+  - The Augmented Dickey-Fuller Test for Nesting Activity, p = 0.0868, and for Average Sea Surface Temperature, p = 0.1000.
+  
+  - Conclusion: We Fail to Reject the Null Hypothesis; **both sets of data are non-stationary**.
   
 ```{r}
 #Verification of Stationarity
 #ADF - Augmented Dickey-Fuller Test (Unit Root Test) - Statistical Verification
-kpss_pval <- turtle_per_month %>%
+kpss_pval <- SARIMAX_table %>%
   features(total_per_month, unitroot_kpss)
 #kpss_pval$kpss_pvalue
+
+root_pval_0 <- SARIMAX_table %>%
+  features(avg_water_temp, unitroot_kpss)
+#root_pval_0$kpss_pvalue
 ```
   - A Time Series Plot was configured and it showed that the Mean and Variance were NOT constant due to the peaks and valleys, i.e., confirming evidence that the data is Non-Stationary (see @fig-ts-plot and @fig-centered-plot).
 ```{r}
-# Time Series Plot - Mean and Variance Plot
-ts_plot <- turtle_per_month %>%
-  autoplot(total_per_month) +
-  labs(title = "Time Series Plot for Visual Check on Constant Mean and Variance",
-       subtitle = " - Monthly Nest Counts",
-       y = "Number of Nests", x = "Date")
-#ts_plot
+
+SARIMAX_table %>%
+  # normalized total_per_month to a 0-1 scale to overlay
+  mutate(nesting_norm = total_per_month / max(total_per_month, na.rm = TRUE)) %>%
+  ggplot(aes(x = !!index(SARIMAX_table))) +
+  # Temperature - filled area
+  geom_area(aes(y = temp_scaled, fill = "Water Temp (Scaled)"), alpha = 0.3) +
+  # Nesting Counts - solid line
+  geom_line(aes(y = nesting_norm, color = "Nesting Activity (Normalized)"), size = 1) +
+  # Styling
+  scale_fill_manual(values = c("Water Temp (Scaled)" = "red")) +
+  scale_color_manual(values = c("Nesting Activity (Normalized)" = "#2c7fb8")) +
+  labs(
+    title = "Temperature Synchronization with Loggerhead Nesting",
+    subtitle = " - Overlaying Normalized Nesting Counts vs Scaled Water Temperature",
+    x = "Year",
+    y = "Relative Intensity (0-1 Scale)",
+    fill = "Exogenous",
+    color = "Main"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
 ```
 
-```{r}
-# 2x12 MA: The standard for even periods
-# first slide_dbl(mean) take the two center numbers, 5 and 6
-# second slide_dbl(mean) for '2-step' centering
-turtle_centered <- turtle_per_month %>%
-  mutate(ma_centered = slide_dbl(total_per_month, 
-                                 mean, .before = 5, .after = 6, .complete = TRUE) %>%
-  slide_dbl(mean, .before = 1, .after = 0, .complete = TRUE))
-# colnames(turtle_per_month)
-
-# Plotting to see the smooth trend
-centered_plot <- turtle_centered %>%
-  filter(!is.na(ma_centered)) %>% # removes warning of missing data - expected 6 month prior and post data length
-  ggplot(aes(x = month_index)) +
-  geom_line(aes(y = total_per_month), color = "gray80") +
-  geom_line(aes(y = ma_centered), color = "green", linewidth = 1) +
-  labs(title = "Centered MA, 2x12 (Clean Trend)")
-#centered_plot
-```
 
 ### Decomposition Determination
-
-  - This is an example of Multiplicative Decomposition because the Residuals, or Remainder, (Y) are not constant over time and are larger as the number of nests increase showing that the seasonal variance is proportional to the trend. The Seasonal component shows a very regular pattern. The Trend is showing a slight upward relationship and could infer that conditions are becoming more favorable for nesting turtles. The trend has successfully captured the the full growth pattern of the data (including the notably large nesting month in 2017) and has ignored the month-to-month bumps. However, because the trend has a large bump, and not a completely horizontal line, shows the need for Differencing in the SARIMAX Model (see @fig-decomp-STL-plot).
-  
 ```{r}
 # Decomposition
-decomp_STL_plot <- turtle_per_month %>%
+decomp_STL_nest_plot <- SARIMAX_table %>%
   model(STL(total_per_month ~ trend(window = 23) + season(window = 12))) %>%
   components() %>%
   autoplot() +
   labs(title = "Decomposition of Turtle Nesting Data",
        subtitle = "Original = Trend (m) + Seasonal (s) + Remainder (R)")
-#decomp_STL_plot
+decomp_STL_nest_plot
 ```
-  - The moderately high Trend Strength (0.5499, close to 0.6 minimum) aligns with having to use Differencing in the SARIMAX model. It also shows that there is a conservative long-term growth in turtle nests.
+  - This is an example of Multiplicative Decomposition because the Residuals, or Remainder, (Y) are not constant over time and are larger as the number of nests increase showing that the seasonal variance is proportional to the trend. The Seasonal component shows a very regular pattern. The Trend is showing a very slight upward relationship and could infer that conditions are becoming more favorable for nesting turtles. The trend has successfully captured the the full growth pattern of the data (including the notably large nesting month in 2017) and has ignored the month-to-month bumps. However, because the trend has a large bump, and not a completely horizontal line, shows the need for Differencing in the SARIMAX Model.  - The Nesting Trend Strength is 0.3163 (0.6 minimum) and considered weak in the SARIMAX model. Unfortunately, this does not bode well for nesting turtles since this shows that there is not a consistent upward trend, although spikes over the years are observed and possible in the future.
+  - The Strong Nesting Seasonal Strength (0.7951) shows that there is a highly predictable season and can be seen directly in @tbl-CCseason-table.
+  
 ```{r}
-trend_str <- turtle_per_day %>%
-  features(total_per_day, feat_stl) %>%
-  select(trend_strength)
-```
-
-  - The Strong Seasonal Strength (0.8087) shows that there is a highly predictable season and can be seen directly in @tbl-CCseason-table.
-```{r}
-season_str <- turtle_per_month %>%
+nesting_str <- SARIMAX_table %>%
   features(total_per_month, feat_stl) %>%
   select(trend_strength, seasonal_strength_year)
-#colnames(season_str)
+#nesting_str
+```
+
+```{r}
+# Decomposition
+decomp_STLS_plot <- SARIMAX_table %>%
+  model(STL(avg_water_temp ~ trend(window = 23) + season(window = 12))) %>%
+  components() %>%
+  autoplot() +
+  labs(title = "Decomposition of Average Water Temperature Data",
+       subtitle = "Original = Trend (m) + Seasonal (s) + Remainder (R)")
+decomp_STLS_plot
+```
+- This is also an example of Multiplicative Decomposition because the Residuals, or Remainder, (Y) are not constant over time. The Seasonal component shows a very regular pattern. The Trend is showing an upward relationship and could infer that water temperatures are getting warmer over the the two decades of data. The month-to-month trend bumps have been smoothed out but the swings are very noticeable and shows the need for Differencing in the SARIMAX Model.
+- The Average Water Temperature Trend Strength is 0.7618 which is considered strong. Unfortunately, this does not bode well for nesting turtles since this shows that the sea surface temperatures are on an upward trend which may interfere with the sex imbalance within turtle populations.
+  - The Strong Nesting Seasonal Strength (0.7571) shows that there is a highly predictable season and can also be seen directly in @tbl-CCseason-table.
+```{r}
+water_str <- SARIMAX_table %>%
+  features(avg_water_temp, feat_stl) %>%
+  select(trend_strength, seasonal_strength_year)
+#water_str
 ```
 
   - There is Differencing Loss in the model. The use of the Seasonal Differencing (D=1) makes the model disregard the first 12 months of data since it has no previous time to compare with.
   
+  
 ### Model Selection
-
-  - The ACF Plot shows that there is Seasonality in the data showing yearly peaks. There is a definite trend since the bars stay high and decrease slowly over all lags. This also shows that the mean is shifting over time and Differencing is required for SARIMAX modelling (see @fig-ACF-tpm).
 ```{r}
 # fpp3 and feasts
-ACF_tpm <- turtle_per_month %>%
+ACF_nest <- SARIMAX_table %>%
   feasts::ACF(total_per_month, lag_max = 264) %>%
   autoplot() +
   labs(title = "ACF: Visual Check of Annual Seasonality",
        subtitle = " - Monthly Nest Counts")
-#ACF_tpm
+ACF_nest
 ```
-  - The PACF determines the order of AR via a "cutoff" point. The cutoff point in the PACF plot is at the 12 month mark after which the spikes are in the "insignificant zone" and is akin to "white noise". This shows there is no direct correlation with the data's own past values at the same time of the year; therefore, p = 0 (see @fig-PACF-tpm).
-  
+- The Nesting ACF Plot shows that there is Seasonality in the data showing yearly peaks. There is a definite trend since the bars stay high and decrease slowly over all lags. This also shows that the mean is shifting over time and Differencing is required for SARIMAX modelling.
 ```{r}
-PACF_tpm <- turtle_per_month %>%
+ACF_water <- SARIMAX_table %>%
+ feasts::ACF(avg_water_temp, lag_max = 264) %>%
+  autoplot() +
+  labs(title = "ACF: Visual Check of Annual Seasonality",
+       subtitle = " - Monthly Average Water Temperature")
+ACF_water
+```
+ - The Water Temperature ACF Plot shows that there is Seasonality in the data showing varied yearly peaks. There is a trend since the bars generally stay high and decrease slowly over all lags with minor fluctuations. This corresponds to the mean shifting over time and supports that Differencing is required for the SARIMAX model.
+ 
+```{r}
+PACF_nest <- SARIMAX_table %>%
   PACF(total_per_month, lag_max = 264) %>%
   autoplot() +
-  labs(title = "PACF: interpretation shows AR(p) component for SARIMAX")
-PACF_tpm
+  scale_x_continuous(breaks = seq(0,264, by = 12)) +
+  labs(title = "PACF: AR(p) component for SARIMAX",
+       subtitle = " - Monthly Nesting Counts") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+PACF_nest
 ```
+- The PACF determines the order of AR via a "cutoff" point. The last significant cutoff point in the plot is at the 48 month mark after which the spikes are in, or very close to, the "insignificant zone" and is akin to "white noise". This shows there is some direct correlation with the data's own past values at the same time the previous year; therefore, p = 0.
 
 ```{r}
-# Automatic Determining of p, q, d, P, Q, D for SARIMAX
+PACF_water <- SARIMAX_table %>%
+  PACF(avg_water_temp, lag_max = 264) %>%
+  autoplot() +
+  scale_x_continuous(breaks = seq(0,264, by = 12)) +
+  labs(title = "PACF: AR(p) component for SARIMAX",
+       subtitle = " - Monthly Nesting Counts") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+PACF_water
+```
+- The last significant cutoff point in the Temperature ACF plot is at the 36 month mark after which the spikes are in the "insignificant zone" and is akin to "white noise". This shows there is some direct correlation with the data's own past values at the same time the previous year; therefore, p = 0 still holds for the overall model behaviour.
 
-#Monthly used because it automatically set the SARIMAX to an annual model
-turtle_ARIMA_fit_month <- turtle_per_month %>%
+```{r}
+# Automatic Determining of p, q, d, P, Q, D for SARIMA
+# monthly used because it automatically set the SARIMA to an annual model
+
+auto_SARIMA_fit <- SARIMAX_table %>%
   model(ARIMA(total_per_month))
-#report(turtle_ARIMA_fit_month)
-#Series: total_per_month 
-#Model: ARIMA(0,0,2)(0,1,1)[12] 
+#report(auto_ARIMA_fit)
+nest_stats <- tidy(auto_SARIMA_fit) %>%
+  mutate(z_statistic = estimate / std.error) %>%
+  select(term, estimate, std.error, z_statistic)
+
+nest_stats %>%
+  gt() %>%
+  gt::tab_header(title = "SARIMA Automatic Modelling Coefficients",
+             subtitle = "- ARIMA(0,0,2)(0,0,1)[12] for Nesting Activity") %>%
+  gt::cols_label(term = "Parameter", estimate = "Coefficient",
+             std.error = "Std. Error", z_statistic = "z-value")
 ```
 
   - The resultant model is actually a **SARIMAX** model - Seasonal ARIMA with an eXogenous variable.
   
 $$
     (1-B^{12})y_t=(1+\theta_1 B+ \theta_2 B^2)(1+\Theta_1 B^{12})\epsilon_t
-                 =(1+0.60B+ 0.14B^2)(1-0.70B^{12})\epsilon_t
+                 =(1+0.60B+ 0.14B^2)(1-0.67B^{12})\epsilon_t
 $$
-**-** ma1 = 0.60 (s.e. = 0.062, significant since ma1 > 2*se)
+**-** ma1 = 0.60 (s.e. = 0.063, significant since ma1 > 2*se)
 
-**-** ma2 = 0.14 (s.e. = 0.061, significant since ma2 > 2*se)
+**-** ma2 = 0.14 (s.e. = 0.062, significant since ma2 > 2*se)
 
-**-** sma1 = -0.70 (s.e. = 0.055, significant since sma1 >> 2*se )
+**-** sma1 = -0.67 (s.e. = 0.058, significant since |sma1| > 2*se )
 
 ```{r}
-sarima_fit_auto <- turtle_ARIMA_fit_month %>% gg_tsresiduals() +
-labs(title = "Residuals: Auto-generated SARIMAX") 
-#sarima_fit_auto
+sarima_fit_auto <- auto_SARIMA_fit %>% gg_tsresiduals() +
+labs(title = "Nesting Residuals: Auto-generated SARIMA") 
+sarima_fit_auto
 ```
   - The ARMA, or Autoregression (AR) and Moving Average (MA), base accounts for zero AR terms and a two month MA. The AR is zero because of the strong seasonality of the model (PQ has more influence). Also, the exogenous surface water temperature shows that it holds the momentum of the monthly nesting activity. 
   
@@ -891,7 +948,7 @@ $$ SARIMAX(p,d,q)(P,D,Q)_{AnnualLag} = SARIMAX(0,0,2)(0,1,1)_{12} $$
 
   - Seasonal Moving Average: **Q = 1**, the model is able to adjust for inconsistencies in nest counts from last year to the current year's prediction. Inconsistencies can arise from weather deviations and other environmental disasters like the Gulf oil spill of Summer, 2010.
   
-  - Checking Residuals(see @fig-arima-fit-auto): shows the graphical representation of the residuals. The following analysis proves that the Auto-generated ARIMA can be considered an accurate representation of the model. 
+  - Checking Residuals(see @fig-sarima-fit-auto): shows the graphical representation of the residuals. The following analysis proves that the Auto-generated ARIMA can be considered an accurate representation of the model. 
 
     - The Innovation Residuals show that the minor "shock" fluctuations mostly remain around a zero-mean like ideal "White Noise". The unexpected negative influence (significant innovation or "shock") at the end of the system shows that the model was not expecting the lower nesting numbers. The equation below explains how the "shocks" that occur in the system are represented to account for unpredictable fluctuations after seasonal and trend instances have been accounted for.
     
@@ -907,7 +964,7 @@ $$
     
 ### Training and Validation
 
-  - The base_sarimax and pdq_sarimax (has p-d-q-P-D-Q values hard-coded into its model) achieved the best overall performance with an Akaike Information Criterion (AIC) of 1544.76 for all data from 1988 to 2019 (see @fig-AIC and @fig-AIC-100). The data for 2020 is set aside to be used to evaluate the model's performance on new unseen data. The negatively-influenced nesting season of 2020 will test the robustness of the model's ability to forecast effectively and accurately.
+  - The base_sarimax and pdq_sarimax (has p-d-q-P-D-Q values hard-coded into its model) achieved the best overall performance with an Akaike Information Criterion (AIC) of 1544.76 for all data from 1988 to 2019. The data for 2020 is set aside to be used to evaluate the model's performance on new unseen data. The negatively-influenced nesting season of 2020 will test the robustness of the model's ability to forecast effectively and accurately.
 
   - I ran both base_sarimax and pdq_sarimax to check that they had the same AIC result, then remove pdq_sarimax to simplify the table. 
   
@@ -916,12 +973,20 @@ $$
 ```{r}
 # 21 years of dataset omitting last year to avoid "Loss" and 2020 dip
 # LOESS smoothing, Fourier Transform, Exponential Smoothing, GAMs options
-
-trained_dataset <- turtle_per_month %>%
-  filter(year(month_index) <= 2019)
-
 # For more details, refer to #https://otexts.com/fpp3/arima-r.html#plotting-the-characteristic-roots
 
+trained_dataset <- SARIMAX_table %>%
+  filter(year(Year_Month) <= 2019)
+
+#SARIMAX_table
+temp_fit <- trained_dataset %>%
+  model(temp_sarimax = ARIMA(total_per_month ~ avg_water_temp))
+#temp_fit %>% report()
+#SARIMAX_table
+temp_fit2 <- trained_dataset %>%
+  model(temp_pdq_sarimax = ARIMA(total_per_month ~ avg_water_temp + pdq(1,0,2) + PDQ(0,1,1)))
+  #temp_fit2 %>% report()
+  
 trained_models <- trained_dataset %>%
   model(
     # Benchmark
@@ -929,90 +994,103 @@ trained_models <- trained_dataset %>%
     # hard-coded with values
     # pdq_sarimax = ARIMA(total_per_month ~ pdq(0,0,2) + PDQ(0,1,1)),
     # Neighboring
-    comp_pdq_sarimax = ARIMA(total_per_month ~ pdq(1,0,2) + PDQ(0,1,1)),
+    neighbor_sarimax = ARIMA(total_per_month ~ pdq(1,0,2) + PDQ(0,1,1)),
     # Exponential Smoothing
     ets_model = ETS(total_per_month),
     # Failed to converge
-    fourier_sarimax_1 = ARIMA(total_per_month ~ fourier(K = 1) + pdq(0,0,2)),
+    # fourier_sarimax_1 = ARIMA(total_per_month ~ fourier(K = 1) + pdq(0,0,2)),
     # Dynamic Harmonic Regression - testing k <= 6 = 12/2 = m/2, m = lag
     fourier_sarimax_2 = ARIMA(total_per_month ~ fourier(K = 2) + pdq(0,0,2)),
     fourier_sarimax_3 = ARIMA(total_per_month ~ fourier(K = 3) + pdq(0,0,2)),
     fourier_sarimax_4 = ARIMA(total_per_month ~ fourier(K = 4) + pdq(0,0,2)),
     fourier_sarimax_5 = ARIMA(total_per_month ~ fourier(K = 5) + pdq(0,0,2)),
     fourier_sarimax_6 = ARIMA(total_per_month ~ fourier(K = 6) + pdq(0,0,2)),
-    # used a GAM-Fourier equivalent because prophet and GAM could not converge
+    # tried a GAM-Fourier equivalent because prophet and GAM could not converge
     gam_fourier_4 = ARIMA(total_per_month ~ fourier(K = 4) + pdq(0,0,0) + PDQ(0,0,0))
-  )
+  ) #tried log on all fourier series and GAM_fourier, failed to converge
 
 # Lowest AIC is the best for model balance of accuracy and simplicity
 fit_metrics <- trained_models %>%
   glance() %>%
-  select(Model = .model, AIC, AICc, BIC, 'Log Likelihood' = log_lik, 'Sigma Squared' = sigma2) %>%
-  arrange(AICc) %>%
-  slice_head(n = 3)
+  select(Model = .model, AIC, AICc, BIC, 'Log Likelihood' = log_lik, 'Sigma Squared' = sigma2)
 
-kable_AIC <- fit_metrics %>%
+temp_metrics <- temp_fit %>%
+  glance() %>%
+  select(Model = .model, AIC, AICc, BIC, 'Log Likelihood' = log_lik, 'Sigma Squared' = sigma2)
+
+temp_metrics2 <- temp_fit2 %>%
+  glance() %>%
+  select(Model = .model, AIC, AICc, BIC, 'Log Likelihood' = log_lik, 'Sigma Squared' = sigma2)
+
+combo_metrics <- bind_rows(temp_metrics, temp_metrics2, fit_metrics) %>%
+  arrange(AICc) %>%
+  mutate(across(where(is.numeric),~ round(.x, 2))) %>%
+  slice(1:4)
+
+kable_temp_AICc <- temp_metrics %>%
   mutate(across(where(is.numeric), ~ round(.x, 2))) %>%
   kable(colnames = c("Model", "AIC",  "AICc", "BIC", "Log Likelihood", "Sigma2"),
-        caption = "Top 3 Models based on AICc Score",
         align = "lccccc")
 
-kable_AIC
+kable_fit_AICc <- fit_metrics %>%
+  mutate(across(where(is.numeric), ~ round(.x, 2))) %>%
+  kable(colnames = c("Model", "AIC",  "AICc", "BIC", "Log Likelihood", "Sigma2"),
+        align = "lccccc")
 
+kable_AICc_updated <- combo_metrics %>%
+  kable(colnames = c("Model", "AIC",  "AICc", "BIC", "Log Likelihood", "Sigma2"),
+        caption = "Model Comparisons Ranked Lowest to Highest by AICc Score",
+        align = "lccccc")
+  
+ kable_AICc_updated 
+ 
 ###########################################################
 trained_tidied <- trained_dataset %>%
   fill_gaps(total_per_month = 0) %>%
-  mutate(total_per_month = total_per_month + 1)
+  mutate(nest_log = log(total_per_month + 1))
+# Both models failed to converge after trying various orders #
 trained_GAM_models <- trained_tidied %>%
-  model(
-    # GAM
-    gam_sarimax = prophet(total_per_month ~ growth("linear") + 
-                  season(period = 12, order = 2, type = "multiplicative")), # failed to converge
-    # Prophet with GAM and Fourier Series - failed to converge
-    prophet_GAM_FS = prophet(total_per_month ~ growth("linear") + season(period = "year", order = 2))
-  )
+  model(gam_sarimax = prophet(nest_log ~ growth("linear") + 
+                  season(period = "year", order = 4, type = "multiplicative")), 
+        prophet_GAM_FS = prophet(nest_log ~ growth("linear") + season(period = "year", order = 8)))
 #trained_GAM_models  
+#fit_metrics <- trained_GAM_models %>%
+#  glance()
 ```
 
 ### Forecasting
 ```{r}
-train <- turtle_per_month %>% filter_index("1998 Jan" ~ "2019 Dec")
-test  <- turtle_per_month %>% filter_index("2020 Jan" ~ "2020 Dec")
+train <- SARIMAX_table %>% filter_index("1998 Jan" ~ "2019 Dec")
+test  <- SARIMAX_table %>% filter_index("2020 Jan" ~ "2020 Dec")
 
 # training (21 years)
 train_fit <- train %>%
-  model(sarimax_train = ARIMA(total_per_month ~ pdq(0,0,2) + PDQ(0,1,1, period = 12)))
+  model(best_sarimax = ARIMA(total_per_month))
 
 # 2020 forecast
 validation_test <- train_fit %>%
-  fabletools::forecast(h = "1 year")
+  fabletools::forecast(new_data = test)
 ```
 
 ```{r}
-# Plot the training, testing, and forecast together
+# plotting the training, testing, and forecast together
 validation_test %>%
-  autoplot(train) +
-  autolayer(test, total_per_month, colour = "black") +
+  autoplot(SARIMAX_table %>% filter_index("1988 Jan" ~ "2020 Dec"), level = 95) + # when using train, the scale will only go to 2019
+  autolayer(test, total_per_month, colour = "red", linewidth = 1) +
   labs(title = "Validation: 21-Year Model vs. 2020 Actuals",
-       y = "Nests", x = "Year")
-
+       y = "Nests", x = "Year") +
+  theme_minimal()
 ```
 
 ```{r}
 validation_test %>%
   filter_index("2019 Jan" ~ "2020 Dec") %>%
   autoplot(train %>% filter_index("2019 Jan" ~ "2020 Dec"), level = 95) +
-  
-  # 2. Add the actual 2020 points (the test set)
-  autolayer(test, total_per_month, colour = "black", size = 1) +
-  
-  # 3. Clean up the labels
-  labs(
-    title = "Close-up: 2020 Model Validation",
-    subtitle = "Blue area: 95% Prediction Interval | Black line: Actual 2020 Nesting",
-    x = "Month",
-    y = "Number of Nests"
-  ) +
+  # add the actual 2020 points (the test set)
+  autolayer(test, total_per_month, colour = "red", size = 1) +
+  labs(title = "Close-up: 2020 Model Validation",
+       subtitle = "Blue area: 95% Prediction Interval | Red line: Actual 2020 Nesting",
+       x = "Month", y = "Number of Nests") +
   theme_minimal()
 ```
 
@@ -1026,147 +1104,33 @@ trained_models %>%
   augment() %>%
   features(.innov, ljung_box, lag = 24, dof = 3) # dof = p + q + P + Q = 3
 
-# p,P,q,Q are estimated parameters like the coefficients - when the model estimates a coefficient, it needs to "spend" a dof. There are no differencing coefficients because the differencing is applied before starts estimating coefficients.
-# dof = 2 + 1 = 3 from q=2 (ma1, ma2) and Q=1 (sma1), 24 total lags
 # p_value > 0.05, fail to reject the null hypothesis - mathematically proves that the residuals are WN - PASS!! 
 # If the p_value < 0.05 reject the null hypothesis - FAIL - Model is leaking info and will need to adjust p,d,or q.
-# 3 parameters is very efficient (parsimonious) - LB test "penalizes" the model for every parameter used
-# no parameters would give an elevated (and incorrect) p-value - independence of residuals confirmed - model is not over-fitted
 ```
-
+```{r}
+train_fit %>%
+  gg_tsresiduals()
+```
+  - Only 3 parameters (degrees of freedom) used: q=2 (ma1, ma2) and Q=1, (sma1).
+  - With greater than 0 parameters used, the independence from the residuals is confirmed and the model is not over-fitted.
+  - The p_value is greater than 0.05, we fail to reject the Null Hypothesis which mathematically proves that the residuals are White Noise.
+  - After applying the Ljung-Box test have officially passed the "base_sarimax". 
 $$
-  dof = TotalLags-(p+q+P+Q)=24-3
+  dof = TotalLags-(p+q+P+Q)=24-3=21
 $$
 
 ```{r}
-# RMSE and MAE for test period to see HOW MANY NESTS OFF the model was during the shock year
-valid_acc <- accuracy(validation_test, turtle_per_month)
+# RMSE and MAE for test period to see HOW MANY NESTS OFF the model was. 
+valid_acc <- accuracy(validation_test, SARIMAX_table)
 
 valid_acc %>%
   #glimpse() %>%
   select(.model, RMSE, MAE)
-# does the plot show that the model is staying in sync with 2019 data before the 2020 dip happens?
-
 ```
-
-## Visualization and Tables
-```{r}
-#| label: fig-buoy-comp
-#| fig-cap: "Comparison of Three Temperature Buoys/deg.C"
-buoy_comp
-```
-
-```{r}
-#| label: tbl-buoy-tukey-table
-#| tbl-cap: "Tukey HSD Comparison of Mean Water Temperatures"
-#| echo: false
-
-kable(buoy_tukey_table)
-```
-
-```{r}
-#| label: fig-total-nesting-year
-#| fig-cap: "Total Number of Loggerheads Nesting Sites/Year, 1998-2020"
-yrly_cnt_nest_sites
-```
-
-```{r}
-#| label: fig-beach-table
-#| fig-cap: "Area Totals of Loggerhead Turtle Nesting Sites: 1998-2020"
-kable_table_beaches
-```
-
-```{r}
-#| label: fig-top-month
-#| fig-cap: "Total Number of Loggerhead Nesting Sites/Month, 1998-2020"
-mnthly_cnt_nest_sites
-```
-
-```{r}
-#| label: tbl-CCseason-table
-#| tbl-cap: "Seasonal Start/End Dates and Total Number of Nesting Sites for Each Season: 1988-2020"
-#| echo: false
-kable_table_season_dates
-```
-
-```{r}
-#| warning: false
-#| message: false
-#| label: fig-ind-plots
-#| fig-cap: "Individual Plots for each Season: 1988-2020"
-ind_plots
-```
-
-```{r}
-#| label: fig-ts-plot
-#| fig-cap: "Time Series Plot for Constant Mean and Variance"
-ts_plot
-```
-
-```{r}
-#| label: fig-centered-plot
-#| fig-cap: "Centered Moving Average, 2x12"
-centered_plot
-```
-
-```{r}
-#| label: fig-decomp-STL-plot
-#| fig-cap: "Decomposition of Turtle Nesting Data into Trend(m), Season(s), and Remainder(R)"
-decomp_STL_plot
-```
-
-```{r}
-#| label: fig-ACF-tpm
-#| fig-cap: ACF - Autocorrelation Function Plot"
-ACF_tpm
-```
-
-```{r}
-#| label: fig-PACF-tpm
-#| fig-cap: PACF - Partial Autocorrelation Function Plot"
-PACF_tpm
-```
-
-```{r}
-#| warning: false
-#| message: false
- sarima_fit_auto <- turtle_ARIMA_fit_month %>% gg_tsresiduals() +
-  labs(title = "Residuals: Auto-generated ARIMA") 
- 
-#| label: fig-sarima-fit-auto
-#| fig-cap: "Residuals: Auto-generated ARIMA"
-sarima_fit_auto
-```
+  - The average number of nests that the model prediction is "off" is 3 which is a very good result. Compounding all of the good results, the spikes seen in month 11 and 23 in the ACF above can be disregarded. 
+  
 
 ## Model Performance and Comparisons
-
-**Model 1: Baseline Univariate ARIMA**
-**- looks at past nest counts**
-**- temperature included in model**
-```{r}
-#Series: total_per_month 
-#Model: ARIMA(0,0,2)(0,1,1)[12] 
-report(turtle_ARIMA_fit_month)
-```
-
-```{r}
-#| label: fig-AIC
-#| fig-cap: "Tabulated AIC of added 'fit' Diagnostics: 21 years of data"
-kable_AIC
-```
-
-
-#| label: fig-AIC-100
-#| fig-cap: "Tabulated AIC of added 'fit' Diagnostics: 22 years of data"
-kable_AIC_100
-
-
-**Model 2: ARIMAX**
-**- Dynamic Regression model**
-**- forecasting by responding to temperature**
-
-Nesting counts are DEPENDENT VARIABLE
-Water Temperature is EXOGENOUS REGRESSOR (xreg)
 
 
 $$
@@ -1175,10 +1139,6 @@ $$
 where $\eta_t$ is an ARIMA process
 part 1 - predict number of nests using temperature data
 part 2 - use ARIMA to take care of the rest?
-
-```{r}
-
-```
 
 ## Uncertainty and Variability
 
@@ -1210,89 +1170,115 @@ TBD
 
 ## Future Work
 ```{r}
-#- The base100_arima and pdq100_arima achieved the best overall #performance again with an AIC of 1588.76 for all data from 1988 to 2020 #(the entire dataset).
-
 # training full dataset
-trained100_dataset <- turtle_per_month %>%
-  filter(year(month_index) <= 2020)
-
-trained100_models <- trained100_dataset %>%
+trained100_models <- SARIMAX_table %>%
   model(
-    # Benchmark
-    base100_arima = ARIMA(total_per_month),
-    pdq100_arima = ARIMA(total_per_month ~ pdq(0,0,2) + PDQ(0,1,1)),
-    comp_pdq100_arima = ARIMA(total_per_month ~ pdq(1,0,2) + PDQ(0,1,1)),
+    base100_sarimax = ARIMA(total_per_month),
+    temp_pdq100_sarimax = ARIMA(total_per_month ~ avg_water_temp + pdq(0,0,2) + PDQ(0,1,1)),
+    neighbor100_arima = ARIMA(total_per_month ~ pdq(1,0,2) + PDQ(0,1,1)),
     # Exponential Smoothing
-    ets100_model = ETS(total_per_month),
-    # Dynamic Harmonic Regression - testing k <= 6 = 12/2 = m/2 
-    fourier100_arima_1 = ARIMA(total_per_month ~ fourier(K = 1) + pdq(0,0,2)),
-    fourier100_arima_2 = ARIMA(total_per_month ~ fourier(K = 2) + pdq(0,0,2)),
-    fourier100_arima_3 = ARIMA(total_per_month ~ fourier(K = 3) + pdq(0,0,2)),
-    fourier100_arima_4 = ARIMA(total_per_month ~ fourier(K = 4) + pdq(0,0,2)),
-    fourier100_arima_5 = ARIMA(total_per_month ~ fourier(K = 5) + pdq(0,0,2)),
-    fourier100_arima_6 = ARIMA(total_per_month ~ fourier(K = 6) + pdq(0,0,2)),
-  )
+    ets100_model = ETS(total_per_month))
 
-fit100_metrics <- trained100_models %>%
+fit_metrics100 <- trained100_models %>%
   glance() %>%
-  select(.model, AIC, AICc, BIC, sigma2) %>%
-  arrange(AICc)
+  select(Model = .model, AIC, AICc, BIC, 'Log Likelihood' = log_lik, 'Sigma Squared' = sigma2)
 
-kable_AIC_100 <- fit100_metrics %>%
-  mutate(across(where(is.numeric), ~ round(.x, 2))) %>%
-  kable(colnames = c("Model", "AIC", "AICc", "BIC", "Sigma2"),
+kable_AICc100_updated <- fit_metrics100 %>%
+  kable(colnames = c("Model", "AIC",  "AICc", "BIC", "Log Likelihood", "Sigma2"),
+        caption = "Full Data Model Comparisons Ranked Lowest to Highest by AICc Score",
         align = "lccccc")
-kable_AIC_100
-```
-
-```{r}
-base100_arima <- trained100_models %>% select(base100_arima)
-report(base100_arima)
+  
+ kable_AICc100_updated 
 ```
 
 ```{r}
 forecast_2026 <- trained100_models %>%
-  select(base100_arima) %>%
+  select(base100_sarimax) %>%
   fabletools::forecast(h = 72)
 
 # Plot with 2021-2026 projection
 forecast_2026 %>%
-  autoplot(turtle_per_month) +
+  autoplot(SARIMAX_table) +
   labs(title = "Loggerhead Nesting Projection (2021-2026)",
        subtitle = " - Using ARIMA(0,0,2)(0,1,1)12",
        y = "Total Nests",
        x = "Year")
 ```
+```{r}
+forecast_2026 %>%
+  autoplot(SARIMAX_table %>% filter_index("2019 Jan" ~ "2020 Dec"), level = 95) +
+  labs(title = "Close-up: 2026 Forecast",
+       subtitle = "Purple area: 95% Prediction Interval | Blue line: 2021-2026 Forecast",
+       x = "Month", y = "Number of Nests") +
+  theme_minimal()
+```
+
+## Additional Visualization and Tables
+```{r}
+#| label: fig-buoy-comp
+#| fig-cap: "Comparison of Three Temperature Buoys/deg.C"
+buoy_comp
+```
 
 ```{r}
-#VISUAL PLOTS THAT SHOW THAT THE MODEL IS RELIABLE along with the determined AICs
-
-# fitted vs actual - fitted is model's creation - laymens view of accuracy, prove to FWC that model has learned previous patterns (seasons)
-# red line shows seasonal strength in that it peaks the same time as the black line - residuals is the gap btn the two colors and one can see the compensation btn the lower and higher peaks
-trained100_models %>%
-  select(base100_arima) %>% # Focus on your best model
-  augment() %>%
-  autoplot(.fitted, colour = "red") +
-  autolayer(turtle_per_month, total_per_month, colour = "black", alpha = 0.5) +
-  labs(title = "Model Fit: Predicted vs. Actual Nesting",
-       y = "Number of Nests",
-       x = "Month")
-
-# residuals vs fitted
-# the errors are scattered about the zero-line, as the predicted number of nests increases, the error variance does not widen significantly. 
-trained100_models %>%
-  augment() %>%
-  ggplot(aes(x = .fitted, y = .resid)) +
-  geom_point() +
-  geom_hline(yintercept = 0, color = "red", linetype = "dashed") +
-  labs(title = "Residuals vs. Fitted Values",
-       subtitle = "Checking for Constant Variance")
+#| label: tbl-buoy-tukey-table
+#| tbl-cap: "Tukey HSD Comparison of Mean Water Temperatures"
+#| echo: false
+kable(buoy_tukey_table)
 ```
-  
-  - The model shows its robustness against "shocks" when we compare the partial dataset with the full dataset with an AIC difference of 44. 
-  
-The Final Forecast (Use 100% data)
-ARIMA(0,0,2)(0,1,1)[12] was proven to be the best model using your Test Set. Re-fit that exact same model using 100% of the data (all 22 years) to generate predictions for 2026.
 
+```{r}
+kable_table_nest_temps <- SARIMAX_table %>%
+  head(5) %>%
+  kable(
+    col.names = c("Year", "Total Nests", "Avg Water Temp.", "Scaled Temp."),
+    caption = "Nesting Data with Scaled Temperature for Plotting Purposes (Partial)",
+    align = "cccc")
+```
 
-# Notes
+```{r}
+#| label: tbl-table-nest-temps
+#| tbl-cap: "Nesting Data with Scaled Temperature Table (Partial)"
+#| echo: false
+kable_table_nest_temps
+```
+
+```{r}
+#| label: fig-total-nesting-year
+#| fig-cap: "Total Number of Loggerheads Nesting Sites/Year, 1998-2020"
+yrly_cnt_nest_sites
+```
+
+```{r}
+#| label: fig-beach-table
+#| fig-cap: "Area Totals of Loggerhead Turtle Nesting Sites: 1998-2020"
+kable_table_beaches
+```
+
+```{r}
+#| label: fig-top-month
+#| fig-cap: "Total Number of Loggerhead Nesting Sites/Month, 1998-2020"
+mnthly_cnt_nest_sites
+```
+
+```{r}
+#| label: fig-relative-nest-temp
+#| fig-cap: "Relative Relationship of Nesting Activity vs Average Temperatures, 1988-2020"
+Relative_Nest_vs_Temp
+```
+
+```{r}
+#| label: tbl-CCseason-table
+#| tbl-cap: "Seasonal Start/End Dates and Total Number of Nesting Sites for Each Season: 1988-2020"
+#| echo: false
+kable_table_season_dates
+```
+
+```{r}
+#| warning: false
+#| message: false
+#| label: fig-ind-plots
+#| fig-cap: "Individual Plots for each Season: 1988-2020"
+ind_plots
+```
+
