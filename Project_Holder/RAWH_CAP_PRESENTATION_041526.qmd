@@ -1,10 +1,11 @@
 ---
 title: "The Nature of Times Series Analysis"
-subtitle: "- Turtle Nesting Activity Explained"
+subtitle: "- Turtle Nesting Activity Mathematically Explained"
 author: "Rachel Hudson (Advisor: Dr. Pu)"
 date: '`r Sys.Date()`'
 format:
-  revealjs
+  revealjs:
+    background-color: "#f0f5f5"  # A very light grey-blue
 course: Capstone Projects in Data Science
 bibliography: references.bib # file contains bibtex for references
 #always_allow_html: true # this allows to get PDF with HTML features
@@ -17,19 +18,8 @@ editor:
     wrap: 72
 ---
 
-::: callout-important
-**Remember:** Your goal is to make your audience understand and care
-about your findings. By crafting a compelling story, you can effectively
-communicate the value of your data science project.
 
-Carefully read this template since it has instructions and tips to
-writing!
-
-More information about `revealjs`:
-<https://quarto.org/docs/reference/formats/presentations/revealjs.html>
-:::
-
-## Introduction  {.smaller}
+## Introduction {.smaller background-color="aquamarine"}
 
 -   Develop a storyline that captures attention and maintains interest.
 
@@ -45,7 +35,7 @@ In kernel estimator, weight function is known as kernel function
 [@efr2008]. Cite this paper [@bro2014principal]. The GEE [@wang2014].
 The PCA [@daffertshofer2004pca]\*
 
-## Methods
+## Methods{background-image="eggs.jpg" background-opacity="0.5"}
 
 -   Detail the models or algorithms used.
 
@@ -80,7 +70,7 @@ library(dslabs)
 
 ggplot1 = murders %>% ggplot(mapping = aes(x=population/10^6, y=total)) 
 
-  ggplot1 + geom_point(aes(col=region), size = 4) +
+  plotting <- ggplot1 + geom_point(aes(col=region), size = 4) +
   geom_text_repel(aes(label=abb)) +
   scale_x_log10() +
   scale_y_log10() +
@@ -92,6 +82,10 @@ ggplot1 = murders %>% ggplot(mapping = aes(x=population/10^6, y=total))
       theme_bw()
   
 
+```
+## Next Slide
+```{r}
+plotting
 ```
 
 ## Modeling and Results
@@ -115,3 +109,17 @@ ggplot1 = murders %>% ggplot(mapping = aes(x=population/10^6, y=total))
 -   Discuss the implications of your results.
 
 ## References
+
+
+
+::: callout-important
+**Turtle Tangent:** Your goal is to make your audience understand and care
+about your findings. By crafting a compelling story, you can effectively
+communicate the value of your data science project.
+
+Carefully read this template since it has instructions and tips to
+writing!
+
+More information about `revealjs`:
+<https://quarto.org/docs/reference/formats/presentations/revealjs.html>
+:::
