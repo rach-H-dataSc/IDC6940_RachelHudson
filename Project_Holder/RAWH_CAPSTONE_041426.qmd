@@ -198,7 +198,12 @@ all_data <- all_data %>%
 kable_table_CConly <- all_data %>%
   select(C_Date, Location, 'Water Temp.', Latitude, Longitude) %>%
   head(5) %>%
-  kable(col.names = c("C_Date", "Location", "Water Temp. (degC)", "Latitude", "Longitude"), align = "lcccc")
+  gt() %>%
+  tab_header(title = "Initial Data Including Water Temperature",
+             subtitle = "Partial Table") %>%
+  cols_label(C_Date = "Date", Location = "Location", `Water Temp.` = "Water Temp (degC)", 
+             Latitude = "Latitude (DDeg)", Longitude = "Longitude (DDeg)") %>%
+  cols_align("center", columns = c(Location, `Water Temp.`, Latitude, Longitude))
 
 map_points <- all_data %>%
   group_by(Location) %>%
@@ -212,7 +217,7 @@ spatial_plot <- ggplot(map_points, aes(x = Longitude, y = Latitude, color = Loca
        subtitle = "Coordinates for Perdido Key, Fort Pickens, Pensacola Beach, and Santa Rosa Beach",
        x = "Longitude (Dec. Degrees)", y = "Latitude (Dec. Degrees)") +
   annotate("point", x = -86.007, y = 28.787, color = "red", size = 3) +
-  annotate("text", x = -86.007, y = 28.787, label = "Station 42039", vjust = -1) +
+  annotate("text", x = -86.007, y = 28.787, label = "Station 42039", vjust = -0.5, hjust = 0.8) +
   theme(plot.title = element_text(hjust = 0.5),
         plot.subtitle = element_text(hjust = 0.5),
         legend.position = "none") # Hidden because points are labeled directly
@@ -221,17 +226,19 @@ spatial_plot <- ggplot(map_points, aes(x = Longitude, y = Latitude, color = Loca
 ```{r}
 # Tabulating the number of nests per location
 
-kable_table_beaches <- all_data %>%
+table_beaches <- all_data %>%
   mutate(Location = case_match(Location,
                                "PK" ~ "Perdido Key",
                                "FP" ~ "Fort Pickens",
                                "PB" ~ "Pensacola Beach",
                                "SR" ~ "Santa Rosa Beach")) %>%
   count(Location, name = "Number of Nests") %>% #descending order
-  arrange(desc(`Number of Nests`)) %>%
-  kable(caption = "Area Totals of Loggerhead Nesting Sites: 1998-2020",
-        col.names = c("Nesting Area", "Total Nests"),
-        align = "lc")
+  arrange(desc(`Number of Nests`))
+
+kable_table_beaches <- table_beaches%>% 
+  gt() %>%
+  gt::tab_header(title = "Beach Area Nest Totals") %>%
+  gt::cols_label(Location = "Location", `Number of Nests` = "Nest Total")
 ```
 
 ```{r}
@@ -454,6 +461,8 @@ Our team was influenced by the initial literary review [@Mazaris2004] where temp
 
 
 ### Buoy Coordinates and Data Sample Sizes
+
+https://www.ndbc.noaa.gov/obs.shtml
 
 Station 42012 - Orange Beach, AL - 30.060 N 87.548 W (30°3'36" N 87°32'54" W) -> 2009-2020
 
@@ -968,7 +977,7 @@ $$
 
   - I ran both base_sarimax and pdq_sarimax to check that they had the same AIC result, then remove pdq_sarimax to simplify the table. 
   
-  - Per the R-Studio-generated warning, "automatic selection does not select models with characteristic roots that may be numerically unstable"[@fpp3]. The base_arima with Box-Cox (lambda = 0, log transform), Fourier 1, Exponential Smoothing, GAMs, and Prophet could not predict a model because a small change in data could make the model unstable. R-Studio ignores the unstable models and will choose something more reliable that will work in the long-term. 
+  - Per the R-Studio-generated warning, "automatic selection does not select models with characteristic roots that may be numerically unstable"[@fpp3]. The base_arima with Box-Cox (lambda = 0, log transform), Fourier 1, GAMs, and Prophet could not predict a model because a small change in data could make the model unstable. R-Studio ignores the unstable models and will choose something more reliable that will work in the long-term. 
   
 ```{r}
 # 21 years of dataset omitting last year to avoid "Loss" and 2020 dip
@@ -1099,11 +1108,17 @@ validation_test %>%
 # Ljung-Box test result for base_sarimax - final test to confidently use the SARIMAX model - PASS
 # LB test quantifies the lack of protrusions (spikes) in the ACF plot
 
-trained_models %>%
+ljung_box_table <- trained_models %>%
   select(base_sarimax) %>%
   augment() %>%
   features(.innov, ljung_box, lag = 24, dof = 3) # dof = p + q + P + Q = 3
 
+ljung_box_table %>%
+  gt() %>%
+  gt::tab_header(title = "Ljung-Box Residual Test Results",
+             subtitle = "- base_sarimax model") %>%
+  gt::cols_label(.model = "Model", lb_stat = "Q-Statistic",
+             lb_pvalue = "p-value")
 # p_value > 0.05, fail to reject the null hypothesis - mathematically proves that the residuals are WN - PASS!! 
 # If the p_value < 0.05 reject the null hypothesis - FAIL - Model is leaking info and will need to adjust p,d,or q.
 ```
@@ -1123,9 +1138,16 @@ $$
 # RMSE and MAE for test period to see HOW MANY NESTS OFF the model was. 
 valid_acc <- accuracy(validation_test, SARIMAX_table)
 
-valid_acc %>%
+RMSE_acc <- valid_acc %>%
   #glimpse() %>%
   select(.model, RMSE, MAE)
+
+RMSE_acc %>%
+  gt() %>%
+  gt::tab_header(title = "Root Mean Squared Error & Mean Average Error",
+             subtitle = "- base_sarimax model") %>%
+  gt::cols_label(.model = "Model", RMSE = "RMSE",
+             MAE = "MAE") 
 ```
   - The average number of nests that the model prediction is "off" is 3 which is a very good result. Compounding all of the good results, the spikes seen in month 11 and 23 in the ACF above can be disregarded. 
   

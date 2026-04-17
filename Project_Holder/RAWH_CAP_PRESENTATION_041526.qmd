@@ -1,11 +1,14 @@
 ---
-title: "The Nature of Times Series Analysis"
-subtitle: "- Turtle Nesting Activity Mathematically Explained"
+title: "The Nature of Time Series Analysis"
+subtitle: "Exploring Gulf Coast Turtle Nesting Activity"
 author: "Rachel Hudson (Advisor: Dr. Pu)"
 date: '`r Sys.Date()`'
 format:
   revealjs:
-    background-color: "#f0f5f5"  # A very light grey-blue
+    title-slide-attributes: 
+      data-background-image: "loggerhead.jpg"
+      data-background-size: "cover"
+      data-background-opacity: "0.3"
 course: Capstone Projects in Data Science
 bibliography: references.bib # file contains bibtex for references
 #always_allow_html: true # this allows to get PDF with HTML features
@@ -19,76 +22,55 @@ editor:
 ---
 
 
-## Introduction {.smaller background-color="aquamarine"}
 
--   Develop a storyline that captures attention and maintains interest.
+## Introduction{background-image="loggerhead.jpg" background-opacity="0.2"}
 
--   Your audience is your peers
+- **Time Series Analysis** to evaluate Loggerhead Turtle Nesting Habits
+- **Biological Data** can be strongly Seasonal
+    
+- How **predictable** are the season start/end dates?
+- How much **influence** do environmental factors have on outcomes?
 
--   Clearly state the problem or question you're addressing.
+- **Nesting Totals** (Main) and **Temperature** (Exogenous)
+-   Integration of all data to produce a **robust model**
 
--   Introduce why it is relevant needs.
+-   To help **local environmentalists** with conservation activities
 
--   Provide an overview of your approach.
+## Background Information{background-image="turtletracks.jpg" background-opacity="0.2"}
 
-In kernel estimator, weight function is known as kernel function
-[@efr2008]. Cite this paper [@bro2014principal]. The GEE [@wang2014].
-The PCA [@daffertshofer2004pca]\*
-
-## Methods{background-image="eggs.jpg" background-opacity="0.5"}
-
--   Detail the models or algorithms used.
-
--   Justify your choices based on the problem and data.
-
-
-
-## Data Exploration and Visualization
-
--   Describe your data sources and collection process.
-
--   Present initial findings and insights through visualizations.
-
--   Highlight unexpected patterns or anomalies.
-
-## Data Exploration and Visualization {.smaller}
-
-A study was conducted to determine how...
-
-```{r, warning=FALSE, echo=F, message=FALSE}
-# loading packages 
-library(tidyverse)
-library(knitr)
-library(ggthemes)
-library(ggrepel)
-library(dslabs)
-```
-
-```{r, warning=FALSE, echo=F}
-# Load Data
-#kable(head(murders))
-
-ggplot1 = murders %>% ggplot(mapping = aes(x=population/10^6, y=total)) 
-
-  plotting <- ggplot1 + geom_point(aes(col=region), size = 4) +
-  geom_text_repel(aes(label=abb)) +
-  scale_x_log10() +
-  scale_y_log10() +
-  geom_smooth(formula = "y~x", method=lm,se = F)+
-  xlab("Populations in Millions (log10 scale)") + 
-  ylab("Total number of Murders (log10 scale)") +
-  ggtitle("US Gun Murders in 2010") +
-  scale_color_discrete(name = "Region")+
-      theme_bw()
+- **Threatened Species**
+- Reach sexual **maturity** at 35 years old
+- Females return to their nesting site **every 2 (or more) years**
+- Average of **4 nests** created each season
+- A nest is created about **every 14 days**
+- **Nesting season** is generally May through September
+- Florida is host to about **100,000 nests each year**
+- Our geographical **area of study** - Perdido Key (366), Fort Pickens (243), Pensacola Beach (278), Santa Rosa Beach (301)
   
+## TSA Process {background-image="turtletracks.jpg" background-opacity="0.2"}
 
-```
-## Next Slide
-```{r}
-plotting
-```
+-   Exploring the data and possible relationships
+-   Examining the stationarity of data
+-   Determining the decomposition method
+-   Selecting a model to capture seasonality trend
+-   Training and validation of the model
+-   Assessing the resulting metrics
+-   Forecasting outcomes and testing consequential residuals
 
-## Modeling and Results
+## 4. Delving Into The Data{.smaller background-image="turtletracks.jpg" background-opacity="0.2"}
+
+-   Gulf Coast Buoy Water Temperature Data added depth to the study
+-   Not every day had a nest; not every day had a temperature
+-   Grouped nests per month; saved the temp at 3pm (recorded 10 mins apart)
+
+## 5. Next Slide{.smaller background-image="turtletracks.jpg" background-opacity="0.2"}
+
+
+
+## 6. Next Slide{.smaller background-image="turtletracks.jpg" background-opacity="0.2"}
+
+
+## 7. Modeling and Results{.smaller background-image="turtletracks.jpg" background-opacity="0.2"}
 
 -   Explain your data preprocessing and cleaning steps.
 
@@ -98,19 +80,19 @@ plotting
 
 -   **Tell a story about what the data reveals.**
 
-```{r}
-
-```
-
-## Conclusion
+## 8. Conclusion{.smaller background-image="LoggerheadHatchlings.jpg" background-opacity="0.2"}
 
 -   Summarize your key findings.
 
 -   Discuss the implications of your results.
 
-## References
+## References{.smaller background-image="Yellowsign.jpg" background-opacity="0.3"}
 
+- In kernel estimator, weight function is known as kernel function
+[@efr2008]. Cite this paper [@bro2014principal]. The GEE [@wang2014].
+The PCA [@daffertshofer2004pca]\*
 
+## Callout Important
 
 ::: callout-important
 **Turtle Tangent:** Your goal is to make your audience understand and care
