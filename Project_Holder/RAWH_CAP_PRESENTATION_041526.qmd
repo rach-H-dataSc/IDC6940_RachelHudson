@@ -21,90 +21,187 @@ editor:
     wrap: 72
 ---
 
-
-
 ## Introduction{background-image="loggerhead.jpg" background-opacity="0.2"}
 
-- **Time Series Analysis** to evaluate Loggerhead Turtle Nesting Habits
-- **Biological Data** can be strongly Seasonal
-    
-- How **predictable** are the season start/end dates?
-- How much **influence** do environmental factors have on outcomes?
+* **Time Series Analysis** to evaluate Loggerhead Turtle Nesting Habits
+* **Biological Data** can be strongly Seasonal
+* How **predictable** are the season start/end dates?
+* How much **influence** do environmental factors have on outcomes?
+* **Nesting Totals** (Main) and **Temperature** (Exogenous)
+* Integration of all data to produce a **robust model**
+* Helps support **local conservation** activities
 
-- **Nesting Totals** (Main) and **Temperature** (Exogenous)
--   Integration of all data to produce a **robust model**
+## Turtle Biology and Beyond {background-image="loggerhead.jpg" background-opacity="0.2"}
 
--   To help **local environmentalists** with conservation activities
+* **Threatened Species**
+* Reach sexual **maturity** at 35 years old
+* Females return to their nesting site **every 2 (or more) years**
+* Average of **4 nests** created each season
+* A nest is created about **every 14 days**
+* **Nesting season** is generally May through September
+* Florida is host to about **100,000 nests each year**
 
-## Background Information{background-image="turtletracks.jpg" background-opacity="0.2"}
+## Delving Into The Data{background-image="oilSpill.png" background-opacity="0.2"}
 
-- **Threatened Species**
-- Reach sexual **maturity** at 35 years old
-- Females return to their nesting site **every 2 (or more) years**
-- Average of **4 nests** created each season
-- A nest is created about **every 14 days**
-- **Nesting season** is generally May through September
-- Florida is host to about **100,000 nests each year**
-- Our geographical **area of study** - Perdido Key (366), Fort Pickens (243), Pensacola Beach (278), Santa Rosa Beach (301)
-  
-## Synchronized Nest vs Temperature Plot{background-image="turtletracks.jpg" background-opacity="0.5" background-size="cover"}
+::: {.rows}
 
-::: {.absolute top="20%" left="8.5%" width="90%" height="70%" style="text-align: center; background-color: rgba(255, 255, 255, 0.4); padding: 10px; border-radius: 10px;"}
+::: {.row height="40%"}
 
-![](synchedNestvsTemp.png){width="80%" fig-align="center"}
-:::
-
-::: {.absolute bottom="5%" left="15%"}
+* Gulf Coast Buoy Water Temperature Data added to original data set
 
 :::
 
+::: {.row height="60%"}
 
-## Process {background-image="synchedNestvsTemp.png" background-size="contain" background-opacity="0.2"}
-
--   Exploring the data and possible relationships
--   Examining the stationarity of data
--   Determining the decomposition method
--   Selecting a model to capture seasonality trend
--   Training and validation of the model
--   Assessing the resulting metrics
--   Forecasting outcomes and testing consequential residuals
-
-
-## 4. Delving Into The Data{.smaller background-image="turtletracks.jpg" background-opacity="0.2"}
-
--   Gulf Coast Buoy Water Temperature Data added depth to the study
--   Perdido Key, Fort Pickens, Pensacola Beach, Santa Rosa Beach
--   Leatherback, Green, Kemp's Riley and Loggerhead Turtles
--   Not every day had a nest; not every day had a temperature
--   Grouped nests per month; saved the temperature at 3pm (recorded 10 mins apart)
-
-## 5. Next Slide{.smaller background-image="turtletracks.jpg" background-opacity="0.2"}
-
-The **S (Seasonal) Component** represents the **regular intervals** at which a relationship can be identified and is to be expected using biological data, i.e., finding the natural rythmn of the model.
-
-The **AR (Autoregressive) Component, p**, involves the model using the relationship of the variable with its own **previous values** (or lagged observations).
-    
-The **I (Integrated) Component, d**, helps to **stabilize the mean** and remove trends from the time series analysis and makes it stationary by differencing (d).
-    
-The **MA (Moving Average) Component, q**, represents the effect of **previous error** terms on the present value of the time series.
-    
-The **X (eXogenous) Component** is an **external variable** that can help fill in the gaps of past behaviour of the data to soften fluctuations and strengthen future predictions. For this analysis, our exogenous variable is the Gulf of Mexico Surface Water Temperature.
-    
-## Next Slide
-
-::: {layout=[[1,1],[1,1]]}
-![](ACFnest.png)
-![](ACFtemp.png)
-
-![](PACFnest.png)
-![](PACFtemp.png)
+![](spatialMapping.png){fig-align="center" height="450px" width="950px"}
 :::
 
-$$
-F_m = max(0,1-[Var(R_t)/Var(m_t + R_t)])
-$$
+:::
 
-## 6. Next Slide{.smaller background-image="turtletracks.jpg" background-opacity="0.2"}
+## Delving Into The Data{background-image="oilSpill.png" background-opacity="0.2"}
+
+* **Date**, **Location**, Longitude, Latitude
+* Leatherback, Green, Kemp's Riley and **Loggerhead Turtles**
+* Perdido Key (most nests), Fort Pickens, Pensacola Beach, Santa Rosa Beach
+* Not every day had a nest; not every day had a temperature
+* Saved the **temperature** at, or next closest time to, 3pm daily
+* Grouped nests per month (most in July)
+* Data Range, 1998-2020 - 2017 highest number of nesting sites
+
+## Environmental Disasters: 1998-2020{background-image="oilSpill.png" background-opacity="0.5"}
+
+::: {.absolute bottom="60" left="220"}
+
+* **Warmest Average Temperature, 1998; tied with 1934**
+* **Hurricane Ivan, September, 2004: Category 3, Baldwin (AL), Escambia (FL), and Santa Rosa (FL) counties affected** 
+* **Deep Horizon Oil Spill, 2010: 134 million gallons and is the largest spill in US history (noaa.gov)**
+
+:::
+
+## TSA SARIMAX Components{.smaller background-image="turtletracks.jpg" background-opacity="0.2"}
+
+* The **S (Seasonal) Component** represents the **regular intervals** at which a relationship can be identified; it is to be expected using biological data, i.e., finding the natural rythmn of the model.
+
+* The **AR (Autoregressive) Component, p**, involves the model using the relationship of the variable with its own **previous values** (or lagged observations).
+    
+* The **I (Integrated) Component, d**, helps to **stabilize the mean** and remove trends from the time series analysis; makes the model stationary by **differencing**.
+    
+* The **MA (Moving Average) Component, q**, represents the effect of **previous error** terms on the present value of the time series.
+    
+* The **X (eXogenous) Component** is an **external variable** that can help fill in the gaps of past behaviour of the data to soften fluctuations and strengthen future predictions. For this analysis, our exogenous variable is the Gulf of Mexico Surface Water Temperature.
+
+
+## TSA Process {background-image="turtletracks.jpg" background-opacity="0.2"}
+
+*  **Exploring** relationships in the data
+*  Examining the **Stationarity** of data
+*  Determining the **Decomposition** method
+*  Selecting a **Model** to capture seasonality trend
+*  **Training and validation** of the model
+*  Assessing the resulting **Metrics**
+*  **Forecasting** outcomes and testing consequential **Residuals**
+
+## Exploratory Data Visualizations {.smaller background-image="turtletracks.jpg" background-opacity="0.2" background-size="cover"}
+
+![](synchedNestvsTemp.png){fig-align="center"}
+
+## Exploratory Data Visializations {.smaller background-image="turtletracks.jpg" background-opacity="0.2" background-size="cover"}
+
+![](IndPlots.png){fig-align="center"}
+
+## Box-Jenkins: Identification{.smaller background-image="turtletracks.jpg" background-opacity="0.2" background-size="cover"}
+
+::: {.columns}
+
+::: {.column width="40%"}
+
+* **Stationarity of Data**
+* Augmented Dickey-Fuller Test (Unit Root Test)
+* Use the KPSS value (Kwiatkowski-Phillips-Schmidt-Shin)
+* KPSS p-value > 0.05
+* **Nesting Activity, p = 0.09** 
+* **Avg. Temperature, p = 0.10**
+* AutoCorrelation Function (ACF) Plot behavior confirms ADF Test
+* **RESULT: Non-Stationary**
+
+:::
+
+::: {.column width="60%"}
+
+![](ACFnest.png){fig-align="right" height="270px"}
+
+![](ACFtemp.png){fig-align="right" height="270px"}
+
+:::
+
+:::
+
+## Box-Jenkins: Identification {.smaller background-image="turtletracks.jpg" background-opacity="0.2" background-size="cover"}
+
+::: {.columns}
+
+::: {.column width="40%"}
+
+* **Seasonality of Data**
+* Observe the Lags
+* Spikes inside "Insignificant Zone" ignored
+* Use the last Spike
+* Can be Monthly (1) to Annually (12) and anything in between
+* **RESULT: Lag 12**
+
+:::
+
+::: {.column width="60%"}
+
+![](PACFnest.png){fig-align="right" height="270px"}
+
+![](PACFtemp.png){fig-align="right" height="270px"}
+:::
+
+:::
+
+## Box-Jenkins: Estimation{.smaller background-image="turtletracks.jpg" background-opacity="0.2"}
+
+::: {.columns}
+
+::: {.column width="40%"}
+
+* Monthly nest counts show high seasonality.
+* Temperature acts as a strong exogenous variable..
+
+:::
+
+::: {.column width="60%"}
+
+![](decompNest.png){fig-align="right" height="290px"}
+![](decompTemp.png){fig-align="right" height="290px"}
+
+:::
+
+:::
+
+## Box-Jenkins: Estimation{.smaller background-image="turtletracks.jpg" background-opacity="0.2"}
+
+::: {.columns}
+
+::: {.column width="40%"}
+
+**Key Findings:**
+
+* Monthly nest counts show high seasonality.
+* Temperature acts as a strong exogenous variable..
+
+:::
+
+::: {.column width="60%"}
+
+![](decompNest.png){fig-align="right" height="290px"}
+![](decompTemp.png){fig-align="right" height="290px"}
+
+:::
+:::
+
+## Box-Jenkins: Diagnostic Checks{.smaller background-image="turtletracks.jpg" background-opacity="0.2"}
 
 ::: {layout=[[1,1],[1,1]]}
 ![](decompNest.png)
@@ -113,12 +210,15 @@ $$
 ![](ACFnest.png)
 ![](ACFtemp.png)
 :::
+![](PACFtemp.png){fig-align="right" height="290px"}
+:::
 
+:::
 ## 7. Modeling and Results{.smaller background-image="turtletracks.jpg" background-opacity="0.2"}
 
 ::: {layout=[[1,1],[1,1]]}
 ![](backshiftEquation.png)
-![](IndPlots.png)
+
 
 ![](ljungBox.png)
 ![](nestingSitesPerMonth.png)
@@ -148,9 +248,9 @@ $$
 
 ## References{.smaller background-image="Yellowsign.jpg" background-opacity="0.3"}
 
-- In kernel estimator, weight function is known as kernel function
-[@efr2008]. Cite this paper [@bro2014principal]. The GEE [@wang2014].
-The PCA [@daffertshofer2004pca]\*
+coast.noaa.gov - hurricane reports
+noaa.gov - 
+ncei.noaa.gov - national climate report https://www.ncei.noaa.gov/access/monitoring/monthly-report/national/201013
 
 ## Callout Important
 
