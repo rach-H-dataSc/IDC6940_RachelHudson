@@ -175,7 +175,7 @@ editor:
 * **RESULT: Differencing, D = 1**
 * Trend Strength = 0.3163
 * Seasonal Strength = 0.7951
-* **RESULT: SEASONAL, S = 1**
+* **RESULT: VERY SEASONAL**
 
 :::
 
@@ -200,9 +200,9 @@ editor:
 * Annual model, monthly data used
 * All coefficients were significant; greater than their doubled standard error, respectively
 * fable package used for ARIMA() and model() functions
-* Dip in 2019?
-* Parsimonious model... for now!
-
+* D = 1 added to stabilze the mean
+* New model... **ARIMA(0,0,2)(0,1,1)[12]**
+* Will be tested as a "neighbor" model in Validation
 :::
 
 ::: {.column width="40%"}
@@ -214,18 +214,22 @@ editor:
 :::
 
 $$\mathbf{
-    (1-B^{12})y_t=(1+\theta_1 B+ \theta_2 B^2)(1+\Theta_1 B^{12})\epsilon_t
-                 =(1+0.6B+ 0.14B^2)(1-0.7B^{12})\epsilon_t}
+    (1-B^{12})y_t=(1+\theta_1 B+ \theta_2 B^2)(1+\Theta_1 B^{12})\epsilon_t}
+$$
+
+$$\mathbf{
+=(1+0.6B+ 0.14B^2)(1-0.7B^{12})\epsilon_t}
 $$
 :::
 
 ## Box-Jenkins: Diagnostic Checks{.smaller background-image="turtletracks.jpg" background-opacity="0.3"}
+
 :::{rows}
 
 :::{.row height="60%"}
 
 * **Innovation Residuals** - shows minor "shock" fluctuations mostly remain around zero-mean ("White Noise")
-* **Ljung-Box Test** (ACF Analysis) - the model can be viewed as a success given that the spikes at 12 and 24 are within the "insignificant" zone
+* **Ljung-Box Test** (ACF Analysis) - the model can be viewed as a success given that the spikes at 12 and 24 are within the "insignificant" zone, spike at Lag 23 is a "shadow"
 * **Residual Histogram** (count vs residuals) - shows that the residuals are centered about zero and follows a fairly normal (bell-shaped) distribution suggesting that the model is unbiased. 
 * **Conclusion** - all available patterns have been captured; the residuals have shown to be uncorrelated and normally distributed
 
@@ -239,39 +243,24 @@ $$
 
 :::
 
-## 7. Training and Validation{.smaller background-image="turtletracks.jpg" background-opacity="0.3"}
+## Training and Validation{.smaller background-image="turtletracks.jpg" background-opacity="0.3"}
 
-
-
+* Models trained on data from 1998-2018
+![](modelVal.png)
+![](modVal2.png){width="275"}
 
 
 ## 7. Modeling and Results{.smaller background-image="turtletracks.jpg" background-opacity="0.2"}
 
-::: {layout=[[1,1],[1,1]]}
-![](backshiftEquation.png)
-
-
 ![](ljungBox.png)
-![](nestingSitesPerMonth.png)
+
 :::
 
--   Explain your data preprocessing and cleaning steps.
-
--   Present your key findings in a clear and concise manner.
-
--   Use visuals to support your claims.
+![](RSME.png)
 
 -   **Tell a story about what the data reveals.**
 
 ## 8. Conclusion{.smaller background-image="LoggerheadHatchlings.jpg" background-opacity="0.2"}
-
-::: {layout=[[1,1],[1,1]]}
-![](PACFnest.png)
-![](PACFtemp.png)
-
-![](ResidualsNest.png)
-![](RSME.png)
-:::
 
 -   Summarize your key findings.
 
@@ -282,17 +271,3 @@ $$
 coast.noaa.gov - hurricane reports
 noaa.gov - 
 ncei.noaa.gov - national climate report https://www.ncei.noaa.gov/access/monitoring/monthly-report/national/201013
-
-## Callout Important
-
-::: callout-important
-**Turtle Tangent:** Your goal is to make your audience understand and care
-about your findings. By crafting a compelling story, you can effectively
-communicate the value of your data science project.
-
-Carefully read this template since it has instructions and tips to
-writing!
-
-More information about `revealjs`:
-<https://quarto.org/docs/reference/formats/presentations/revealjs.html>
-:::
