@@ -245,26 +245,76 @@ $$
 
 ## Training and Validation{.smaller background-image="turtletracks.jpg" background-opacity="0.3"}
 
+:::::{columns}
+
+:::{.column width="50%}
 * Models trained on data from 1998-2018
-![](modelVal.png)
-![](modVal2.png){width="275"}
 
+* n_sarimax_002_011 = ARIMA(total_per_month ~ pdq(0,0,2) + PDQ(0,1,1))
 
-## 7. Modeling and Results{.smaller background-image="turtletracks.jpg" background-opacity="0.2"}
+* sarimax_002_001 = ARIMA(total_per_month ~ pdq(0,0,2) + PDQ(0,0,1))
 
-![](ljungBox.png)
+* fourier_sarimax_5 = ARIMA(total_per_month ~ fourier(K = 5) + pdq(0,0,2))
+
+* base_snaive = SNAIVE(total_per_month)
+:::
+
+:::{.column width="50%"}
+
+![](modelVal.png){align="center" height="300px"}
+
+![](modVal2.png){align="center" height="100px"}
 
 :::
 
+:::::
+
+## Forecasting and Metrics {.smaller background-image="turtletracks.jpg" background-opacity="0.2"}
+
+:::::{columns}
+
+:::{.column width="56%"}
+
+![](trainTest.png)
+:::
+
+:::{.column width="40%"}
+
+
+![](ljungBox.png)
+
+
 ![](RSME.png)
 
--   **Tell a story about what the data reveals.**
+:::
 
-## 8. Conclusion{.smaller background-image="LoggerheadHatchlings.jpg" background-opacity="0.2"}
+:::::
+
+## Conclusion {.smaller background-image="LoggerheadHatchlings.jpg" background-opacity="0.2"}
+
+-   **Tell a story about what the data reveals.**
 
 -   Summarize your key findings.
 
 -   Discuss the implications of your results.
+
+## Future Work: 2026 Forecast {.smaller background-image="LoggerheadHatchlings.jpg" background-opacity="0.2"}
+
+:::::{columns}
+
+:::{.column width="60%"}
+
+![](2026forecast.png)
+
+:::
+
+:::{.column width="40%"}
+
+![](forecastmodels.png)
+
+:::
+
+:::::
 
 ## References{.smaller background-image="Yellowsign.jpg" background-opacity="0.3"}
 

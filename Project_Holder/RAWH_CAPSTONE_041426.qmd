@@ -1007,7 +1007,7 @@ $$
     
 ### Training and Validation
 
-  - The base_sarimax and pdq_sarimax (has p-d-q-P-D-Q values hard-coded into its model) achieved the best overall performance with an Akaike Information Criterion (AIC) of 1544.76 for all data from 1988 to 2019. The data for 2020 is set aside to be used to evaluate the model's performance on new unseen data. The negatively-influenced nesting season of 2020 will test the robustness of the model's ability to forecast effectively and accurately.
+  - The base_sarimax and pdq_sarimax (has p-d-q-P-D-Q values hard-coded into its model) achieved the best overall performance with an Akaike Information Criterion (AIC) of 1544.76 for all data from 1988 to 2018. The data for 2020 is set aside to be used to evaluate the model's performance on new unseen data. The negatively-influenced nesting season of 2020 will test the robustness of the model's ability to forecast effectively and accurately.
 
   - I ran both base_sarimax and pdq_sarimax to check that they had the same AIC result, then remove pdq_sarimax to simplify the table. 
   
@@ -1026,7 +1026,8 @@ temp_fit <- trained_dataset %>%
 #temp_fit %>% report()
 
 temp_fit2 <- trained_dataset %>%
-  model(temp_sarimax_002_001 = ARIMA(total_per_month ~ avg_water_temp + pdq(0,0,2) + PDQ(0,0,1)))
+  model(temp_sarimax_002_001 = ARIMA(total_per_month ~ avg_water_temp + pdq(0,0,2) + PDQ(0,0,1)),
+        temp_sarimax_002_011 = ARIMA(total_per_month ~ avg_water_temp + pdq(0,0,2) + PDQ(0,1,1)))
   #temp_fit2 %>% report()
   
 trained_models <- trained_dataset %>%
@@ -1035,8 +1036,6 @@ trained_models <- trained_dataset %>%
     auto_sarimax = ARIMA(total_per_month),
     sarimax_002_001 = ARIMA(total_per_month ~ pdq(0,0,2) + PDQ(0,0,1)),
     base_snaive = SNAIVE(total_per_month),
-    # hard-coded with values
-    # pdq_sarimax = ARIMA(total_per_month ~ pdq(0,0,2) + PDQ(0,0,1)),
     # Neighboring
     n_sarimax_002_011 = ARIMA(total_per_month ~ pdq(0,0,2) + PDQ(0,1,1)),
     # Exponential Smoothing
@@ -1073,7 +1072,7 @@ combo_metrics <- bind_rows(temp_metrics, temp_metrics2, fit_metrics) %>%
 
 kable_AICc_updated <- combo_metrics %>%
   gt() %>%
-  tab_header(title = "Top 5 Models AICc Scores (Ranked)",
+  tab_header(title = "Models AICc Scores (Ranked Lowest to Highest)",
              subtitle = "- Partial Dataset, 1998-2019") %>%
   cols_label(Model = "Model", AICc = "AICc", AIC = "AIC", BIC = "BIC", 
              log_lik = "Log Likelihood", sigma2 = "Sigma Squ.") %>%
@@ -1105,7 +1104,7 @@ test  <- SARIMAX_table %>% filter_index("2019 Jan" ~ "2020 Dec")
 
 # training (20 years)
 train_fit <- train %>%
-  model(n_sarimax_002_011 = ARIMA(total_per_month ~ pdq(0,0,2) + PDQ(0,1,1)),)
+  model(n_sarimax_002_011 = ARIMA(total_per_month ~ pdq(0,0,2) + PDQ(0,1,1)))
 
 # 2020 forecast
 validation_test <- train_fit %>%
@@ -1115,7 +1114,7 @@ validation_test <- train_fit %>%
 ```{r}
 # plotting the training, testing, and forecast together
 validation_test %>%
-  autoplot(SARIMAX_table %>% filter_index("1988 Jan" ~ "2020 Dec"), level = 95) + # when using train, the scale will only go to 2019
+  autoplot(SARIMAX_table %>% filter_index("1998 Jan" ~ "2020 Dec"), level = 95) + # when using train, the scale will only go to 2019
   autolayer(test, total_per_month, colour = "red", linewidth = 1) +
   labs(title = "Validation: 21-Year Model vs. 2020 Actuals",
        y = "Nests", x = "Year") +
@@ -1126,7 +1125,7 @@ validation_test %>%
 validation_test %>%
   filter_index("2017 Jan" ~ "2020 Dec") %>%
   autoplot(train %>% filter_index("2017 Jan" ~ "2020 Dec"), level = 95) +
-  # add the actual 2020 points (the test set)
+  # add the actual 2019-2020 points (the test set)
   autolayer(test, total_per_month, colour = "red", size = 1) +
   labs(title = "Close-up: 2020 Model Validation",
        subtitle = "Blue area: 95% Prediction Interval | Red line: Actual 2020 Nesting",
@@ -1140,14 +1139,14 @@ validation_test %>%
 # LB test quantifies the lack of protrusions (spikes) in the ACF plot
 
 ljung_box_table <- trained_models %>%
-  select(base_sarimax) %>%
+  select(n_sarimax_002_011) %>%
   augment() %>%
-  features(.innov, ljung_box, lag = 24, dof = 3) # dof = p + q + P + Q = 3
+  features(.innov, ljung_box, lag = 24, dof = 3) # dof = p + q + P + Q = 3, the model can only estimate these
 
 ljung_box_table %>%
   gt() %>%
   gt::tab_header(title = "Ljung-Box Residual Test Results",
-             subtitle = "- base_sarimax model") %>%
+             subtitle = "- n_sarimax_002_011") %>%
   gt::cols_label(.model = "Model", lb_stat = "Q-Statistic",
              lb_pvalue = "p-value")
 # p_value > 0.05, fail to reject the null hypothesis - mathematically proves that the residuals are WN - PASS!! 
@@ -1157,7 +1156,7 @@ ljung_box_table %>%
 train_fit %>%
   gg_tsresiduals()
 ```
-  - Only 3 parameters (degrees of freedom) used: q=2 (ma1, ma2) and Q=1, (sma1).
+  - Only 3 parameters (degrees of freedom) used: q=2 (ma1, ma2) and D=1, Q=1, (sma1).
   - With greater than 0 parameters used, the independence from the residuals is confirmed and the model is not over-fitted.
   - The p_value is greater than 0.05, we fail to reject the Null Hypothesis which mathematically proves that the residuals are White Noise.
   - After applying the Ljung-Box test have officially passed the "base_sarimax". 
@@ -1176,11 +1175,11 @@ RMSE_acc <- valid_acc %>%
 RMSE_acc %>%
   gt() %>%
   gt::tab_header(title = "Root Mean Squared Error & Mean Average Error",
-             subtitle = "- base_sarimax model") %>%
+             subtitle = "- n_sarimax_002_011") %>%
   gt::cols_label(.model = "Model", RMSE = "RMSE",
              MAE = "MAE") 
 ```
-  - The average number of nests that the model prediction is "off" is 3 which is a very good result. Compounding all of the good results, the spikes seen in month 11 and 23 in the ACF above can be disregarded. 
+  - The average number of nests that the model prediction is "off" is 8 which is a good result. 
   
 
 ## Model Performance and Comparisons
@@ -1190,8 +1189,6 @@ $$
   y_t=\beta(Temperature_t) +\eta_t
 $$
 where $\eta_t$ is an ARIMA process
-part 1 - predict number of nests using temperature data
-part 2 - use ARIMA to take care of the rest?
 
 ## Uncertainty and Variability
 
@@ -1223,23 +1220,25 @@ TBD
 
 ## Future Work
 ```{r}
-# training full dataset
+
 trained100_models <- SARIMAX_table %>%
   model(
-    base100_sarimax = ARIMA(total_per_month),
-    temp100_sarimax = ARIMA(total_per_month ~ avg_water_temp),
-    temp_pdq100_sarimax = ARIMA(total_per_month ~ avg_water_temp + pdq(0,0,2) + PDQ(0,1,1)),
-    neighbor100_arima = ARIMA(total_per_month ~ pdq(1,0,2) + PDQ(0,1,1)),
+    auto_full = ARIMA(total_per_month),
+    snaive_full = SNAIVE(total_per_month),
+    temp_full = ARIMA(total_per_month ~ avg_water_temp),
+    temp_full_0 = ARIMA(total_per_month ~ avg_water_temp + pdq(0,0,2) + PDQ(0,0,1)),
+    temp_full_1 = ARIMA(total_per_month ~ avg_water_temp + pdq(0,0,2) + PDQ(0,1,1)),
+    neighbor_full_1 = ARIMA(total_per_month ~ pdq(0,0,2) + PDQ(0,1,1)),
     # Exponential Smoothing
     ets100_model = ETS(total_per_month),
-        # fourier_sarimax_1 = ARIMA(total_per_month ~ fourier(K = 1) + pdq(0,0,2)),
+    f100_sarimax_1 = ARIMA(total_per_month ~ fourier(K = 1) + pdq(0,0,2)),
     # Dynamic Harmonic Regression - testing k <= 6 = 12/2 = m/2, m = lag
     f100_sarimax_2 = ARIMA(total_per_month ~ fourier(K = 2) + pdq(0,0,2)),
     f100_sarimax_3 = ARIMA(total_per_month ~ fourier(K = 3) + pdq(0,0,2)),
     f100_sarimax_4 = ARIMA(total_per_month ~ fourier(K = 4) + pdq(0,0,2)),
     f100_sarimax_5 = ARIMA(total_per_month ~ fourier(K = 5) + pdq(0,0,2)),
     f100_sarimax_6 = ARIMA(total_per_month ~ fourier(K = 6) + pdq(0,0,2)),
-)
+    gam_fourier_4 = ARIMA(total_per_month ~ fourier(K = 4) + pdq(0,0,0) + PDQ(0,0,0)))
 
 fit_metrics100 <- trained100_models %>%
   glance() %>%
@@ -1262,7 +1261,7 @@ kable_AICc100_updated <- fit_metrics100 %>%
 
 ```{r}
 forecast_2026 <- trained100_models %>%
-  select(base100_sarimax) %>%
+  select(neighbor_full_1) %>%
   fabletools::forecast(h = 72)
 
 # Plot with 2021-2026 projection
