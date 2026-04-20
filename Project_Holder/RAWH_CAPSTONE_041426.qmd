@@ -679,9 +679,9 @@ $$
 
 -   **Box-Jenkins time series method** has three steps that the time series analysis can be run through iteratively.
 
-    -   **Step 1: Identification** determines the order of the Seasonal and non-seasonal AR, I and MA components that are appropriate for the time series and where the eXogenous variable is incorporated. Within this step, there is a Stationarity Check for stability using the mean and variance of the model and this includes determining the Seasonal Stationarity. If there are significant fluntuations in the Mean (from analyzing the peaks and troughs), Seasonal Differencing(D) is needed as well as Standard Differencing (d). Next, the Autocorrelation and Partial Autocorrelation Analysis (ACF and PACF) plots are generated to identify model lags or Seasonal Spikes (most probably a multiple of 12). The spikes will be used to identify the Seasonal Autoregressive (P) and Seasonal Moving Average (Q). The Seasonality Check of the data is to confirm that there is a repeating 12-month pattern, or biological cycle where s=12, thus, validating the "S" component in SARIMAX. The relationship between the Exogenous Variable (X)  and the time series nedds to be identified appropriately such that it is statistically relavent and aligned (may have to impose a lag) to the overall model and can help explain the model's behaviour. 
+    -   **Step 1: Identification** determines the order of the Seasonal and non-seasonal AR, I and MA components that are appropriate for the time series and where the eXogenous variable is incorporated. Within this step, there is a Stationarity Check for stability using the mean and variance of the model and this includes determining the Seasonal Stationarity. If there are significant fluntuations in the Mean (from analyzing the peaks and troughs), Seasonal Differencing(D) is needed as well as Standard Differencing (d). Next, the Autocorrelation and Partial Autocorrelation Analysis (ACF and PACF) plots are generated to identify model lags or Seasonal Spikes (most probably a multiple of 12). The spikes will be used to identify the Seasonal Autoregressive (P) and Seasonal Moving Average (Q). The Seasonality Check of the data is to confirm that there is a repeating 12-month pattern, or biological cycle where s=12, thus, validating the "S" component in SARIMAX. The relationship between the Exogenous Variable (X) and the time series nedds to be identified appropriately such that it is statistically relavent and aligned (may have to impose a lag) to the overall model and can help explain the model's behaviour. 
         
-    -   **Step 2: Estimation** is where the a model is selected based on the identified seasonal and non-seasonal parameters $(p, d, q)$ x $(P,D,Q)_s$. The AR and MA lags are also selected based on the ACF and PACF found in the previous identification step. The non-seasonal AR ($\phi$) and MA coefficients ($\theta$) will be designated as well as the seasonal AR ($\Phi$) and MA ($\Theta$) coefficients, if they exist. Lastly, for this step, the SARIMAX model's exogenous variable coefficient ($\beta$) can be estimated. All of thee parameters will be applied and the model generates the fitted values to synthesize its unique historical behavior and predictive nature while amalgamating its historic patterns with the exogenous temperature data. The Akaike Information Criterion (AIC) will be used to make a parsimonious model to ensure accuracy using as few parameters as possible - too many parameters can diminish the model's optimization. 
+    -   **Step 2: Estimation** is where the a model is selected based on the identified seasonal and non-seasonal parameters $(p, d, q)$ x $(P,D,Q)_s$. The AR and MA lags are also selected based on the ACF and PACF found in the previous identification step. The non-seasonal AR ($\phi$) and MA coefficients ($\theta$) will be designated as well as the seasonal AR ($\Phi$) and MA ($\Theta$) coefficients, if they exist. Lastly, for this step, the SARIMAX model's exogenous variable coefficient ($\beta$) can be estimated. All of these parameters will be applied and the model generates the fitted values to synthesize its unique historical behavior and predictive nature while amalgamating its historic patterns with the exogenous temperature data. The Akaike Information Criterion (AIC) will be used to make a parsimonious model to ensure accuracy using as few parameters as possible - too many parameters can diminish the model's optimization. 
         
     -   **Step 3: Diagnostic Checking** involves investigating the residuals (the difference between the predicted SARIMAX values and observed data) to ensure no additional patterns are left in the error/residual terms; the residuals should resemble "white noise" randomness. Next, the
         **Ljung-Box Test** is utilized to check to see if the residuals are
@@ -828,7 +828,6 @@ root_pval_0 <- SARIMAX_table %>%
 ```
   - A Time Series Plot was configured and it showed that the **Mean and Variance were NOT constant** due to the peaks and valleys, i.e., confirming evidence that the data is Non-Stationary.
 
-
 ### Decomposition Determination
 ```{r}
 # Decomposition
@@ -840,7 +839,8 @@ decomp_STL_nest_plot <- SARIMAX_table %>%
        subtitle = "Original = Trend (m) + Seasonal (s) + Remainder (R)")
 decomp_STL_nest_plot
 ```
-  - This is an example of Multiplicative Decomposition because the Residuals, or Remainder, (Y) are not constant over time and are larger as the number of nests increase showing that the seasonal variance is proportional to the trend. The Seasonal component shows a very regular pattern. The Trend is showing a very slight upward relationship and could infer that conditions are becoming more favorable for nesting turtles. The trend has successfully captured the the full growth pattern of the data (including the notably large nesting month in 2017) and has ignored the month-to-month bumps. However, because the trend has a large bump, and not a completely horizontal line, shows the need for Differencing in the SARIMAX Model.  - The Nesting Trend Strength is 0.3163 (0.6 minimum) and considered weak in the SARIMAX model. Unfortunately, this does not bode well for nesting turtles since this shows that there is not a consistent upward trend, although spikes over the years are observed and possible in the future.
+  - This is an example of Multiplicative Decomposition because the Residuals, or Remainder, (Y) are not constant over time and are larger as the number of nests increase showing that the seasonal variance is proportional to the trend. The Seasonal component shows a very regular pattern. The Trend is showing a very slight upward relationship and could infer that conditions are becoming more favorable for nesting turtles. The trend has successfully captured the the full growth pattern of the data (including the notably large nesting month in 2017) and has ignored the month-to-month bumps. However, because the trend has a large bump, and not a completely horizontal line, shows the need for Differencing in the SARIMAX Model.  
+  - The Nesting Trend Strength is 0.3163 (0.6 minimum) and considered weak in the SARIMAX model. Unfortunately, this does not bode well for nesting turtles since this shows that there is not a consistent upward trend, although spikes over the years are observed and possible in the future.
   - The Strong Nesting Seasonal Strength (0.7951) shows that there is a highly predictable season and can be seen directly in @tbl-CCseason-table.
   
 ```{r}
@@ -919,12 +919,19 @@ PACF_water
 - The last significant cutoff point in the Temperature ACF plot is at the 36 month mark after which the spikes are in the "insignificant zone" and is akin to "white noise". This shows there is some direct correlation with the data's own past values at the same time the previous year; therefore, p = 0 still holds for the overall model behaviour.
 
 ```{r}
-# Automatic Determining of p, q, d, P, Q, D for SARIMA
+# Automatic Determining of p, q, P, Q for SARIMA
 # monthly used because it automatically set the SARIMA to an annual model
 
 auto_SARIMA_fit <- SARIMAX_table %>%
   model(ARIMA(total_per_month))
 #report(auto_ARIMA_fit)
+
+#dataset_21 <- SARIMAX_table %>%
+#  filter(year(Year_Month) <= 2019)
+#auto_fit <- SARIMAX_table %>%
+#  model(ARIMA(total_per_month))
+#report(auto_fit)
+
 nest_stats <- tidy(auto_SARIMA_fit) %>%
   mutate(z_statistic = estimate / std.error) %>%
   select(term, estimate, std.error, z_statistic)
@@ -941,7 +948,7 @@ nest_stats %>%
   
 $$
     (1-B^{12})y_t=(1+\theta_1 B+ \theta_2 B^2)(1+\Theta_1 B^{12})\epsilon_t
-                 =(1+0.60B+ 0.14B^2)(1-0.67B^{12})\epsilon_t
+                 =(1+0.60B+ 0.14B^2)(1-0.7B^{12})\epsilon_t
 $$
 **-** ma1 = 0.60 (s.e. = 0.063, significant since ma1 > 2*se)
 
@@ -954,7 +961,7 @@ sarima_fit_auto <- auto_SARIMA_fit %>% gg_tsresiduals() +
 labs(title = "Nesting Residuals: Auto-generated SARIMA") 
 sarima_fit_auto
 ```
-  - The ARMA, or Autoregression (AR) and Moving Average (MA), base accounts for zero AR terms and a two month MA. The AR is zero because of the strong seasonality of the model (PQ has more influence). Also, the exogenous surface water temperature shows that it holds the momentum of the monthly nesting activity. 
+  - The ARMA, or Autoregression (AR) and Moving Average (MA), base accounts for zero AR terms and a two month MA. The AR is zero because of the strong seasonality of the model (PQ has more influence). Also, the exogenous surface water temperature shows that it holds the momentum of the monthly nesting activity and provides an innate seasonality to the model. 
   
   - The S in SARIMA adds Seasonality to the ARIMA model; PQ defines the Seasonality of the model capturing the nesting cycle.
   
@@ -962,13 +969,13 @@ sarima_fit_auto
 
   - The final SARIMAX equation is as follows: 
   
-$$ SARIMAX(p,d,q)(P,D,Q)_{AnnualLag} = SARIMAX(0,0,2)(0,1,1)_{12} $$ 
+$$ SARIMAX(p,d,q)(P,D,Q)_{AnnualLag} = SARIMAX(0,0,2)(0,0,1)_{12} $$ 
   
   Note: Model was able to distinguish the change in nests numbers from month-to-month by correctly assigning a 12 month lag.
   
   - Difference: **d = 0**, due to less relevant Trend Strength. The Differencing at a level 1 (d=1) for the dataset found in Stationarity of data section BUT dropped from the model because the Seasonal Differencing came from a much stronger value that proved to stabilize the mean. Over-differencing, i.e. having an unnecessary second level of differencing, can make a model less accurate.
 
-  - Seasonal Difference: **D = 1**, due to strong Seasonal Strength.
+  - Seasonal Difference: **D = 0**, due to strong Seasonal Strength of both the nesting activity and the water temperature, the model is strong enough to drive its own seasonality; it could also be that the dip in 2019 nesting activity could have been the slight disruption that set D = 0.
 
   - Autoaggressive: **p = 0**, the number of nests found in one month does not have a ripple effect from the previous month possibly because turtles nest every two years (on average) and may not be the same set of turtles returning annually.
 
@@ -1008,13 +1015,15 @@ $$
 trained_dataset <- SARIMAX_table %>%
   filter(year(Year_Month) <= 2019)
 
-#SARIMAX_table
+trained <- trained_dataset %>%
+  model(base_sarimax = ARIMA(total_per_month))
+
 temp_fit <- trained_dataset %>%
   model(temp_sarimax = ARIMA(total_per_month ~ avg_water_temp))
 #temp_fit %>% report()
-#SARIMAX_table
+
 temp_fit2 <- trained_dataset %>%
-  model(temp_pdq_sarimax = ARIMA(total_per_month ~ avg_water_temp + pdq(1,0,2) + PDQ(0,1,1)))
+  model(temp_pdq_sarimax = ARIMA(total_per_month ~ avg_water_temp + pdq(0,0,2) + PDQ(0,0,1)))
   #temp_fit2 %>% report()
   
 trained_models <- trained_dataset %>%
@@ -1022,13 +1031,13 @@ trained_models <- trained_dataset %>%
     # Benchmark
     base_sarimax = ARIMA(total_per_month),
     # hard-coded with values
-    # pdq_sarimax = ARIMA(total_per_month ~ pdq(0,0,2) + PDQ(0,1,1)),
+    # pdq_sarimax = ARIMA(total_per_month ~ pdq(0,0,2) + PDQ(0,0,1)),
     # Neighboring
-    neighbor_sarimax = ARIMA(total_per_month ~ pdq(1,0,2) + PDQ(0,1,1)),
+    neighbor_sarimax = ARIMA(total_per_month ~ pdq(1,0,2) + PDQ(0,0,1)),
     # Exponential Smoothing
     ets_model = ETS(total_per_month),
     # Failed to converge
-    # fourier_sarimax_1 = ARIMA(total_per_month ~ fourier(K = 1) + pdq(0,0,2)),
+    fourier_sarimax_1 = ARIMA(total_per_month ~ fourier(K = 1) + pdq(0,0,2)),
     # Dynamic Harmonic Regression - testing k <= 6 = 12/2 = m/2, m = lag
     fourier_sarimax_2 = ARIMA(total_per_month ~ fourier(K = 2) + pdq(0,0,2)),
     fourier_sarimax_3 = ARIMA(total_per_month ~ fourier(K = 3) + pdq(0,0,2)),
@@ -1077,9 +1086,11 @@ trained_GAM_models <- trained_tidied %>%
   model(gam_sarimax = prophet(nest_log ~ growth("linear") + 
                   season(period = "year", order = 4, type = "multiplicative")), 
         prophet_GAM_FS = prophet(nest_log ~ growth("linear") + season(period = "year", order = 8)))
+
+#report(trained)
 #trained_GAM_models  
 #fit_metrics <- trained_GAM_models %>%
-#  glance()
+ #glance()
 ```
 
 ### Forecasting

@@ -21,7 +21,7 @@ editor:
     wrap: 72
 ---
 
-## Introduction{background-image="loggerhead.jpg" background-opacity="0.2"}
+## Introduction{background-image="loggerhead.jpg" background-opacity="0.3"}
 
 * **Time Series Analysis** to evaluate Loggerhead Turtle Nesting Habits
 * **Biological Data** can be strongly Seasonal
@@ -31,7 +31,7 @@ editor:
 * Integration of all data to produce a **robust model**
 * Helps support **local conservation** activities
 
-## Turtle Biology and Beyond {background-image="loggerhead.jpg" background-opacity="0.2"}
+## Turtle Biology and Beyond {background-image="loggerhead.jpg" background-opacity="0.3"}
 
 * **Threatened Species**
 * Reach sexual **maturity** at 35 years old
@@ -78,7 +78,7 @@ editor:
 
 :::
 
-## TSA SARIMAX Components{.smaller background-image="turtletracks.jpg" background-opacity="0.2"}
+## TSA SARIMAX Components{.smaller background-image="turtletracks.jpg" background-opacity="0.3"}
 
 * The **S (Seasonal) Component** represents the **regular intervals** at which a relationship can be identified; it is to be expected using biological data, i.e., finding the natural rythmn of the model.
 
@@ -91,7 +91,7 @@ editor:
 * The **X (eXogenous) Component** is an **external variable** that can help fill in the gaps of past behaviour of the data to soften fluctuations and strengthen future predictions. For this analysis, our exogenous variable is the Gulf of Mexico Surface Water Temperature.
 
 
-## TSA Process {background-image="turtletracks.jpg" background-opacity="0.2"}
+## TSA Process {background-image="turtletracks.jpg" background-opacity="0.3"}
 
 *  **Exploring** relationships in the data
 *  Examining the **Stationarity** of data
@@ -101,15 +101,15 @@ editor:
 *  Assessing the resulting **Metrics**
 *  **Forecasting** outcomes and testing consequential **Residuals**
 
-## Exploratory Data Visualizations {.smaller background-image="turtletracks.jpg" background-opacity="0.2" background-size="cover"}
+## Exploratory Data Visualizations {.smaller background-image="turtletracks.jpg" background-opacity="0.3" background-size="cover"}
 
 ![](synchedNestvsTemp.png){fig-align="center"}
 
-## Exploratory Data Visializations {.smaller background-image="turtletracks.jpg" background-opacity="0.2" background-size="cover"}
+## Exploratory Data Visializations {.smaller background-image="turtletracks.jpg" background-opacity="0.3" background-size="cover"}
 
 ![](IndPlots.png){fig-align="center"}
 
-## Box-Jenkins: Identification{.smaller background-image="turtletracks.jpg" background-opacity="0.2" background-size="cover"}
+## Box-Jenkins: Identification{.smaller background-image="turtletracks.jpg" background-opacity="0.3" background-size="cover"}
 
 ::: {.columns}
 
@@ -136,7 +136,7 @@ editor:
 
 :::
 
-## Box-Jenkins: Identification {.smaller background-image="turtletracks.jpg" background-opacity="0.2" background-size="cover"}
+## Box-Jenkins: Identification {.smaller background-image="turtletracks.jpg" background-opacity="0.3" background-size="cover"}
 
 ::: {.columns}
 
@@ -160,60 +160,91 @@ editor:
 
 :::
 
-## Box-Jenkins: Estimation{.smaller background-image="turtletracks.jpg" background-opacity="0.2"}
+## Box-Jenkins: Estimation{.smaller background-image="turtletracks.jpg" background-opacity="0.3"}
 
 ::: {.columns}
 
-::: {.column width="40%"}
+::: {.column width="45%"}
 
-* Monthly nest counts show high seasonality.
-* Temperature acts as a strong exogenous variable..
+* **Nest STL Plot**
+* Seasonal and Trend decomposition using Loess in feasts Package
+* Residuals, or Remainder, (Y) not constant over time
+* Residuals grow as number of nests increase
+* **RESULT: MULTIPLICATIVE DECOMPOSITION**
+* Trend not completely horizontal
+* **RESULT: Differencing, D = 1**
+* Trend Strength = 0.3163
+* Seasonal Strength = 0.7951
+* **RESULT: SEASONAL, S = 1**
 
 :::
 
-::: {.column width="60%"}
+::: {.column width="55%"}
 
-![](decompNest.png){fig-align="right" height="290px"}
-![](decompTemp.png){fig-align="right" height="290px"}
+![](decompNest.png){fig-align="right" height="275px"}
+
+![](decompTemp.png){fig-align="right" height="275px"}
 
 :::
 
 :::
 
-## Box-Jenkins: Estimation{.smaller background-image="turtletracks.jpg" background-opacity="0.2"}
+## Box-Jenkins: Estimation{.smaller background-image="turtletracks.jpg" background-opacity="0.3"}
 
 ::: {.columns}
 
-::: {.column width="40%"}
-
-**Key Findings:**
-
-* Monthly nest counts show high seasonality.
-* Temperature acts as a strong exogenous variable..
-
-:::
-
 ::: {.column width="60%"}
 
-![](decompNest.png){fig-align="right" height="290px"}
-![](decompTemp.png){fig-align="right" height="290px"}
+* **Modelling**
+* p, d, q, P, D, Q to be estimated/confirmed
+* Annual model, monthly data used
+* All coefficients were significant; greater than their doubled standard error, respectively
+* fable package used for ARIMA() and model() functions
+* Dip in 2019?
+* Parsimonious model... for now!
 
 :::
-:::
 
-## Box-Jenkins: Diagnostic Checks{.smaller background-image="turtletracks.jpg" background-opacity="0.2"}
+::: {.column width="40%"}
 
-::: {layout=[[1,1],[1,1]]}
-![](decompNest.png)
-![](decompTemp.png)
+![](modelcode.png){fig-align="center"}
 
-![](ACFnest.png)
-![](ACFtemp.png)
-:::
-![](PACFtemp.png){fig-align="right" height="290px"}
-:::
+![](SARIMAcoefficients.png){fig-align="right"}
 
 :::
+
+$$\mathbf{
+    (1-B^{12})y_t=(1+\theta_1 B+ \theta_2 B^2)(1+\Theta_1 B^{12})\epsilon_t
+                 =(1+0.6B+ 0.14B^2)(1-0.7B^{12})\epsilon_t}
+$$
+:::
+
+## Box-Jenkins: Diagnostic Checks{.smaller background-image="turtletracks.jpg" background-opacity="0.3"}
+:::{rows}
+
+:::{.row height="60%"}
+
+* **Innovation Residuals** - shows minor "shock" fluctuations mostly remain around zero-mean ("White Noise")
+* **Ljung-Box Test** (ACF Analysis) - the model can be viewed as a success given that the spikes at 12 and 24 are within the "insignificant" zone
+* **Residual Histogram** (count vs residuals) - shows that the residuals are centered about zero and follows a fairly normal (bell-shaped) distribution suggesting that the model is unbiased. 
+* **Conclusion** - all available patterns have been captured; the residuals have shown to be uncorrelated and normally distributed
+
+:::
+
+:::{.row height="40%"}
+
+![](ResidualsNest.png){fig-align="center" width="500" height="240"}
+
+:::
+
+:::
+
+## 7. Training and Validation{.smaller background-image="turtletracks.jpg" background-opacity="0.3"}
+
+
+
+
+
 ## 7. Modeling and Results{.smaller background-image="turtletracks.jpg" background-opacity="0.2"}
 
 ::: {layout=[[1,1],[1,1]]}
