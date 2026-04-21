@@ -1330,7 +1330,7 @@ phenology_data_table <- season_listing %>%
             End = yday(season_end),
             Peak = (Beginning + End)/2,
             Total = End - Beginning) 
-phenology_data_table
+#phenology_data_table
 
 #Convert tsibble for Exploratory Data Plot
 phenology_ed <- phenology_data_table %>%
@@ -1372,7 +1372,7 @@ season_end_table <- season_listing %>%
   transmute(Year = as.integer(Year),
             End = season_end,
             End_DOY = yday(season_end))
-season_start_table
+#season_start_table
 
 ggplot(season_end_table, aes(x = Year, y = End_DOY)) +
   geom_line(size = 1, color = "green") +
@@ -1387,7 +1387,6 @@ ggplot(season_end_table, aes(x = Year, y = End_DOY)) +
 #getting later but only marginally
 #VERY LATE 1999 and 2012*
 #EARLIEST 2000* and consistently early between 2014 and 2017
-
 ```
 
 ```{r}
@@ -1481,6 +1480,8 @@ begin_months %>%
 ```{r}
 begin_months <- begin_months %>% arrange(Year)
 
+#cross-correlation to see if there is a relationship between two TSAs
+# Shows how water temp tracks Nesting Start Date
 #lag at 0 (0.493) 
 ccf_begin <- ccf(begin_months$avg_begin_temp,
                  begin_months$Begin_DOY,
@@ -1500,9 +1501,21 @@ summary(lm(Begin_DOY ~ avg_begin_temp, data = begin_months))
 # for every 1 degC increase in May/June, the nesting season is predicted to start approximately 2 days later
 summary(lm(Begin_DOY ~ avg_begin_temp, data = subset(begin_months, Year != 2019)))
 
-begin_fit <- begin_months %>%
-  model(model = ARIMA(Begin_DOY ~ avg_begin_temp + pdq(0,0,2) + PDQ(0,1,1)))
-report(begin_fit)
+print("Begin Date") 
+# turtles begin date is Day 146 +/- 14 days (sqrt(185.8)~14)
+# s.e. is low, so prediction is significant
+begin_fit_0 <- begin_months %>%
+  model(model = ARIMA(Begin_DOY ))
+report(begin_fit_0)
+
+print("Begin Date with Temperature") 
+# For every 1 degC increase, the nesting season is predicted to move approximately 5 days later
+# If temp is 25 degC, then the nesting season begins at Day 145
+begin_fit_1 <- begin_months %>%
+  model(model = ARIMA(Begin_DOY ~ avg_begin_temp))
+report(begin_fit_1)
+
+# The 6-point drop in AIC after adding water temp shows that the water-temp-dependent model is statistically better
 ```
 
 
@@ -1513,8 +1526,77 @@ begin_months_intervention <- begin_months %>%
   mutate(no_2019 = ifelse(Year == 2019, 1, 0)) %>%
   as_tsibble(index = Year)
 
+begin_months_intervention <- begin_months %>%
+  mutate(no_2019 = ifelse(Year == 2019, 1, 0)) %>%
+  as_tsibble(index = Year)
+
 fit_begin_intervention <- begin_months_intervention %>%
-  model(model_begin_dummy = ARIMA(Begin_DOY ~ avg_begin_temp + no_2019 + pdq(0,0,2) + PDQ(0,1,1)))
+  model(model_begin_dummy = ARIMA(Begin_DOY ~ avg_begin_temp + no_2019))
+
+# Intervention Variable coefficient = 15.09
+# Water Temp coefficient = 5.41
+# p and q not needed because no more pattern to capture
+# AICc is low = 187, sigma2 is high = 123.8 but at least we have a model (was NULL before intervention variable added)
+report(fit_begin_intervention)
+# Innovation Residuals are beebopping, so they resemble white noise, may include individual turtle health, journey, weather conditions etc
+# White noise grows and retracts
+gg_tsresiduals(fit_begin_intervention)
+
+#In conclusion coeffient of 5.4 and 0.493 at Lag 0 means as the water warms, the nesting season becomes later - maybe the turtles are holding off but have to nest anyway
+
+```
+
+
+```{r}
+end_months <- end_months %>% arrange(Year)
+
+# cross-correlation to see if there is a relationship between two TSAs
+# Shows how water temp tracks Nesting End Date
+# lag at 0 (0.564) - stronger correlation to water temp - the end of the season is more likely to happen because of a particular temp
+ccf_end <- ccf(end_months$avg_end_temp,
+                 end_months$End_DOY,
+                 lag.max = 6,
+                 plot = TRUE,
+                 main = "CCF: July/Aug/Sept End Temps vs. Season End")
+ccf_end
+```
+
+
+```{r}
+# p-value < 0.05 for avg_end_temp, R2 = 0.2862
+# for every 1 degC increase in Jul/Aug/Sept, the nesting season is predicted to end approximately 23 days later
+summary(lm(End_DOY ~ avg_end_temp, data = end_months))
+
+# p-value > 0.05 for avg_end_temp, R2 = 0.08
+# for every 1 degC increase in Jul/Aug/Sept, the nesting season is predicted to end approximately 9 days later
+summary(lm(End_DOY ~ avg_end_temp, data = subset(end_months, Year != 2012)))
+
+print("End Date") 
+# turtles end date is Day 229 +/- 21 days (sqrt(421.3)~21)
+# s.e. is low, so prediction of end day is significant
+end_fit_0 <- end_months %>%
+  model(model = ARIMA(End_DOY ))
+report(end_fit_0)
+
+print("End Date with Temperature") 
+# For every 1 degC increase, the nesting season is predicted to extend approximately 7 days
+end_fit_1 <- end_months %>%
+  model(model = ARIMA(End_DOY ~ avg_end_temp))
+report(end_fit_1)
+
+# The 7-point drop in AIC after adding water temp shows that the water-temp-dependent model is statistically better
+```
+
+
+```{r}
+# create intervention variable to handle 2019 shock year separately
+# helps smooth the model out
+end_months_intervention <- end_months %>%
+  mutate(no_2012 = ifelse(Year == 2012, 1, 0)) %>%
+  as_tsibble(index = Year)
+
+fit_begin_intervention <- begin_months_intervention %>%
+  model(model_begin_dummy = ARIMA(Begin_DOY ~ avg_begin_temp + no_2019))
 
 # Intervention Variable coefficient = 15.09
 # Water Temp coefficient = 5.41
