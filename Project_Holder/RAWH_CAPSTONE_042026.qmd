@@ -361,7 +361,7 @@ buoy_tukey_table <- tidy(TukeyHSD(anova_summary)) %>%
 
 ABSTRACT
 
-  Are the nesting habits of Loggerhead Turtles predictable? Can we look back on data and predictors to forecast what the future has on store for Loggerhead Turtle populations? Based on the past observed number of nest sites found along certain Gulf Coast beaches and Sea Surface Temperature (SST) data from the Gulf of Mexico, we can help environmentalists support conservation efforts by predicting the future of Loggerhead Turtle nesting counts and the overall population stability. We will mathematically explain Loggerhead Turtle nesting habits by using Time Series Analysis (TSA). TSA is used regularly for biological data which is generally highly seasonal. After looking at relationships in the raw data, testing grouping viability (daily vs. monthly), choosing a model to represent the data, and fitting the resultant model to help forecasting efforts, we were able to correctly predict the two years of monthly nesting counts with a 95% confidence interval even with a dip in the nest counts for 2019. We also predicted that the nest count would be within 9 nests each season. While it is promising that the nests counts are fairly consistent, and are shown to be rising, it would have been beneficial to know if the nest was viable in that how many turtles returned to The Gulf.
+  Are the nesting habits of Loggerhead Turtles predictable? Can we look back on data and predictors to forecast what the future has on store for Loggerhead Turtle populations? Based on the past observed number of nest sites found along Perdido Key, Fort Pickens, Pensacola Beach, and Santa Rosa Beach. Gulf Coast beaches and Sea Surface Temperature (SST) data from the Gulf of Mexico, we can help environmentalists support conservation efforts by predicting the future of Loggerhead Turtle nesting counts and the overall population stability. We will mathematically explain Loggerhead Turtle nesting habits by using Time Series Analysis (TSA). TSA is used regularly for biological data which is generally highly seasonal. After looking at relationships in the raw data, testing grouping viability (daily vs. monthly), choosing a model to represent the data, and fitting the resultant model to help forecasting efforts, we were able to correctly predict the last two years of monthly nesting counts with a 95% confidence interval even with a dip in the nest counts for 2019. We also predicted that the nest count would be within 9 nests each season. 
 
 INTRODUCTION
 
@@ -506,7 +506,7 @@ The first series of analysis involves
 
 At this point, we also need to identify outliers and if they are significant for the overall analysis or whether they should be trimmed. It is also important to find any data that could be interpreted as "not applicable" which would also skew the analysis with erroneous results, for example, some data points may have "n/a", "na", or a blank/missing value while others may put a number or letter sequence that would not match with the rest of the data. 
 
-These errors in the data may not be discovered until plotting results. Checking for linear relationships between two columns at a time may reveal mistakes in the data set or erroneous values. I was able to determine that several pairs of longitude and latitude points were incorrectly recorded based on a simple spatial mapping plot of longitude vs latitude. Since this is a collaborative effort with Dr. Schmutz (Professor of Earth and Environmental Science, UWF), he was notified so that he could make the decision to omit the data or correct it; negative signs were missing from the longitude data and he decided to correct them. We found that all erroneous temperature readings recorded from the buoy were the number '999' and so this had to be filtered out too because the data would definitely be skewed. 
+These errors in the data may not be discovered until plotting results. Checking for linear relationships between two columns at a time may reveal mistakes in the data set or erroneous values. I was able to determine that several pairs of longitude and latitude points were incorrectly recorded based on a simple spatial mapping plot of longitude vs latitude. Since this is a collaborative effort with Dr. Schmutz (Professor of Earth and Environmental Science, UWF), he was notified so that he could make the decision to omit the data or correct it; negative signs were missing from the longitude data and he decided to correct them. We found that all erroneous temperature readings recorded from the buoy were the number '999' and so this had to be filtered out too because the data would definitely be skewed. [we excluded any erroneous values]
 
 
 STATIONARITY OF DATA
@@ -597,7 +597,6 @@ Relative_Nest_vs_Temp <- SARIMAX_table %>%
   theme_minimal()
 ```
 
-
 DECOMPOSITION DETERMINATION
 
 Classical Decomposition Methods comprise of the Additive method and the Multiplicative method. 
@@ -608,26 +607,38 @@ An additive model's graphical representation will show that there will be parall
 
 The components (S,T,R) are proven to be independent by performing an additive decomposition and checking to see how R performs - if R (remainder/noise) remains fairly consistent, then an additive decomposition is needed; however, if R oscillates and increases in magnitude (and continues to do so) then the multiplicative decomposition has to be used.
 
-$$ 
-    y_t = S_t + T_t + R_t 
-$$
+$$\begin{equation} 
+
+y_t = S_t + T_t + R_t 
+
+\end{equation}$$
 where S=Seasonal, T=Trend, R=Residuals/Noise at time *t*
 
 The multiplicative decomposition is used when the the magnitude of the seasonal fluctuations are proportional to the level of the time series. Essentially, there is a percentage change between the start and the end of each season and, as  aforementioned, the residuals are checked for continually increasing oscillations.
 
-$$ 
-    y_t = S_t \times T_t \times R_t 
-$$
+$$\begin{equation} 
+
+y_t = S_t \times T_t \times R_t 
+    
+\end{equation}$$
+
 The STL method in R - Seasonal-Trend decomposition using Loess (Locally Estimated Scatterplot Smoothing) to show the breakdown of S, T and R.
 
 The Trend Strength, $F_t$, is the comparison of Remainder ($R_t$) versus the variance of the Data-without-Trend ($T_t + R_t$) and how much data volatility there is in the long term.
-$$
+
+$$\begin{equation}
+
 F_m = max(0,1-[Var(R_t)/Var(m_t + R_t)])
-$$
+
+\end{equation}$$
+
 The Seasonal Strength, $F_s$, is the comparison of Remainder ($Y_t$) versus the reduction in variance of the Seasonally-Adjusted data ($S_t + R_t$) after the Trend has been removed.
-$$
+
+$$\begin{equation}
+
 F_s = max(0,1-[Var(R_t)/Var(s_t + R_t)])
-$$
+
+\end{equation}$$
 
 
 MODEL SELECTION
@@ -726,15 +737,6 @@ SOFTWARE AND TOOLS
 - STL method - Seasonal-Trend decomposition using Loess (Locally Estimated Scatterplot Smoothing).
 
 
-ETHICAL CONSIDERATIONS
-
-Data integrity and Transparency
-
-Conservation Policies
-
-Sensitive Information/Species Protection
-
-
 RESULTS
 
 The analysis addresses the extent at which the nesting trends are changing with respect to:
@@ -756,7 +758,7 @@ EXPLORATORY DATA AND VISUALIZATIONS
   Relative Relationship between Nesting Activity and Average monthly temperatures show a high correlation (see @fig-relative-nest-temp).
   The plot, shown below, shows the relationship between the water temperature and nesting activity. The water temperature was scaled and the nesting activity was normalized so that they could use the same Relative Intensity scale.
 ```{r}
-SARIMAX_table %>%
+synched_plot <- SARIMAX_table %>%
   # normalized total_per_month to a 0-1 scale to overlay
   mutate(nesting_norm = total_per_month / max(total_per_month, na.rm = TRUE)) %>%
   ggplot(aes(x = !!index(SARIMAX_table))) +
@@ -776,7 +778,9 @@ SARIMAX_table %>%
     color = "Main"
   ) +
   theme_minimal() +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") +
+  theme(panel.background = element_rect(fill = "aliceblue", color = "black"))
+synched_plot
 ```
 
 STATIONARITY OF DATA
@@ -891,7 +895,7 @@ PACF_water <- SARIMAX_table %>%
   autoplot() +
   scale_x_continuous(breaks = seq(0,264, by = 12)) +
   labs(title = "PACF: AR(p) component for SARIMAX",
-       subtitle = " - Monthly Nesting Counts") +
+       subtitle = " - Monthly Water Temps") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 PACF_water
 ```
@@ -934,11 +938,11 @@ $$
                  =(1+0.6B+ 0.14B^2)(1-0.7B^{12})\epsilon_t
 $$
  
-**-** ma1 = 0.60 (s.e. = 0.063, significant since ma1 > 2*se)
+**-** ma1 = 0.60 (s.e. = 0.063, significant since z > 1.96)
 
-**-** ma2 = 0.14 (s.e. = 0.062, significant since ma2 > 2*se)
+**-** ma2 = 0.14 (s.e. = 0.062, significant since z > 1.96)
 
-**-** sma1 = -0.70 (s.e. = 0.058, significant since |sma1| > 2*se )
+**-** sma1 = -0.70 (s.e. = 0.058, significant since z > 1.96)
 
 ```{r}
 sarima_fit_auto <- auto_SARIMA_fit %>% gg_tsresiduals() +
@@ -1420,10 +1424,9 @@ p2 <- ggplot(begin_months, aes(x = Year, y = avg_begin_temp)) +
   labs(x = "Year", y = "Temp (degC)") +
   theme_minimal()
 
-# 3. Combine them
+# plot together
 p1 / p2
 ```
-
 ```{r}
 temp_end <- sth_tmp_all_sheets %>%
   mutate(Date = as.Date(C_Date)) %>%
@@ -1526,10 +1529,6 @@ begin_months_intervention <- begin_months %>%
   mutate(no_2019 = ifelse(Year == 2019, 1, 0)) %>%
   as_tsibble(index = Year)
 
-begin_months_intervention <- begin_months %>%
-  mutate(no_2019 = ifelse(Year == 2019, 1, 0)) %>%
-  as_tsibble(index = Year)
-
 fit_begin_intervention <- begin_months_intervention %>%
   model(model_begin_dummy = ARIMA(Begin_DOY ~ avg_begin_temp + no_2019))
 
@@ -1568,45 +1567,51 @@ ccf_end
 summary(lm(End_DOY ~ avg_end_temp, data = end_months))
 
 # p-value > 0.05 for avg_end_temp, R2 = 0.08
-# for every 1 degC increase in Jul/Aug/Sept, the nesting season is predicted to end approximately 9 days later
+# for every 1 degC increase in Jul/Aug/Sept, the nesting season is predicted to end approximately 23 days later
 summary(lm(End_DOY ~ avg_end_temp, data = subset(end_months, Year != 2012)))
 
 print("End Date") 
-# turtles end date is Day 229 +/- 21 days (sqrt(421.3)~21)
-# s.e. is low, so prediction of end day is significant
+# turtles begin date is Day 229 +/- 21 days (sqrt(421.3)~21)
+# s.e. = 4, low, so prediction of end day is significant
+# AIC = 207
 end_fit_0 <- end_months %>%
   model(model = ARIMA(End_DOY ))
 report(end_fit_0)
 
+gg_tsresiduals(end_fit_0)
+
 print("End Date with Temperature") 
-# For every 1 degC increase, the nesting season is predicted to extend approximately 7 days
+# For every 1 degC increase, the nesting season is predicted to extend approximately 9 days
+# s.e. = 7
+# AIC = 202
 end_fit_1 <- end_months %>%
   model(model = ARIMA(End_DOY ~ avg_end_temp))
 report(end_fit_1)
 
-# The 7-point drop in AIC after adding water temp shows that the water-temp-dependent model is statistically better
+gg_tsresiduals(end_fit_1)
+
+# The 5-point drop in AIC after adding water temp shows that the water-temp-dependent model is statistically better
 ```
 
 
 ```{r}
-# create intervention variable to handle 2019 shock year separately
+# create intervention variable to handle 2012 shock year separately
 # helps smooth the model out
 end_months_intervention <- end_months %>%
   mutate(no_2012 = ifelse(Year == 2012, 1, 0)) %>%
   as_tsibble(index = Year)
 
-fit_begin_intervention <- begin_months_intervention %>%
-  model(model_begin_dummy = ARIMA(Begin_DOY ~ avg_begin_temp + no_2019))
+fit_end_intervention <- end_months_intervention %>%
+  model(model_end_dummy = ARIMA(End_DOY ~ avg_end_temp + no_2012))
 
-# Intervention Variable coefficient = 15.09
-# Water Temp coefficient = 5.41
-# p and q not needed because no more pattern to capture
-# AICc is low = 187, sigma2 is high = 123.8 but at least we have a model (was NULL before intervention variable added)
-report(fit_begin_intervention)
+# Intervention Variable coefficient = - 61, nesting season ended 61 days early than Day 229
+# Water Temp coefficient = 8, for every 1 degC, the season extends by 8 days
+# AICc is low = 190, sigma2 is high = 189
+report(fit_end_intervention)
+
 # Innovation Residuals are beebopping, so they resemble white noise, may include individual turtle health, journey, weather conditions etc
 # White noise grows and retracts
-gg_tsresiduals(fit_begin_intervention)
+gg_tsresiduals(fit_end_intervention)
 
-#In conclusion coeffient of 5.4 and 0.493 at Lag 0 means as the water warms, the nesting season becomes later - maybe the turtles are holding off but have to nest anyway
 
 ```
