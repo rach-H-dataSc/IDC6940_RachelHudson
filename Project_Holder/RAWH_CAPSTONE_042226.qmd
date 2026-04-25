@@ -1169,7 +1169,18 @@ ljung_box_temp %>%
              lb_pvalue = "p-value")
 ```
 ```{r}
+# training (20 years)
+#train_fit <- train %>%
+#  model(n_sarimax_002_011 = ARIMA(total_per_month ~ pdq(0,0,2) + PDQ(0,1,1)))
+
+# training (20 years)
+#train_fit_alt <- train %>%
+#  model(temp_sarimax_002_011 = ARIMA(total_per_month ~ avg_water_temp + pdq(0,0,2) + PDQ(0,1,1)))
+
 train_fit %>%
+  gg_tsresiduals()
+
+train_fit_alt %>%
   gg_tsresiduals()
 ```
 Only 3 parameters (degrees of freedom) used: q=2 (ma1, ma2) and D=1, Q=1, (sma1).
@@ -1192,6 +1203,19 @@ RMSE_acc %>%
   gt() %>%
   gt::tab_header(title = "Root Mean Squared Error & Mean Average Error",
              subtitle = "- n_sarimax_002_011") %>%
+  gt::cols_label(.model = "Model", RMSE = "RMSE",
+             MAE = "MAE") 
+
+valid_acc_alt <- accuracy(validation_test_alt, SARIMAX_table)
+
+RMSE_acc_alt <- valid_acc_alt %>%
+  #glimpse() %>%
+  select(.model, RMSE, MAE)
+
+RMSE_acc_alt %>%
+  gt() %>%
+  gt::tab_header(title = "Root Mean Squared Error & Mean Average Error",
+             subtitle = "- temp_sarimax_002_011") %>%
   gt::cols_label(.model = "Model", RMSE = "RMSE",
              MAE = "MAE") 
 ```
