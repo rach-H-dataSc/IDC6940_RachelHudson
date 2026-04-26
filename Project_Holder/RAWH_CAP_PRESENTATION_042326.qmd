@@ -468,12 +468,11 @@ spatial_plot
 
 ## Natural Behavior {background-color="#528B8B"}
 
+* Turtles are **ectothermic**
 * **Nesting season** is generally May through September
-* Florida is host to around **100,000 nests**
-* Females return to nesting site **every 2 (or more) years**
-* **Re-migration** of females
+* **Re-migration** interval **every 2 (or more) years**
+* **Inter-nesting** interval (attempted) on average **every 14 days**
 * Florida is the breeding ground for **90% of Loggerhead population** worldwide! 
-
 
 ## Environmental Disasters: 1998-2020 {background="oilSpill.png" background-opacity="0.9"}
 
