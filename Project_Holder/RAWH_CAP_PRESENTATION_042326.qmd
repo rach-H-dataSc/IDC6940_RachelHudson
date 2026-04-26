@@ -1,6 +1,6 @@
 ---
 title: "The Nature of Time Series Analysis"
-subtitle: "Exploring Gulf Coast Turtle Nesting Activity"
+subtitle: "Phenological Study of Gulf Coast Turtle Nesting Activity"
 author: "Rachel Hudson (Advisors: Dr. Pu, Dr. Seals, Dr. Schmutz)"
 date: '`r Sys.Date()`'
 format:
