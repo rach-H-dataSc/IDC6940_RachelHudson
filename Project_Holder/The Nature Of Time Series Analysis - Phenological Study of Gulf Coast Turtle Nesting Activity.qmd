@@ -521,14 +521,15 @@ synched_plot
 
 **S (Seasonal) Component** - represents the **regular intervals** at which a relationship can be identified; it is to be expected using biological data, i.e., finding the natural rhythm of the model.
 
-**AR (Autoregressive) Component, p** - involves the model using the relationship of the variable with its own **previous values** (or lagged observations).
+**AR (Autoregressive) Component, p or P** - involves the model using the relationship of the variable with its own **previous values** (or lagged observations).
     
-**I (Integrated) Component, d** - helps to **stabilize the mean** and remove trends from the time series analysis; makes the model stationary by **differencing**.
+**I (Integrated) Component, d or D** - helps to **stabilize the mean** and remove trends from the time series analysis; makes the model stationary by **differencing**.
     
-**MA (Moving Average) Component, q** - represents the effect of **previous error** terms on the present value of the time series.
+**MA (Moving Average) Component, q or Q** - represents the effect of **previous error** terms on the present value of the time series.
     
 **X (eXogenous) Component** - the **external variable** that can help fill in the gaps of past behaviour of the data to soften fluctuations and strengthen future predictions. For this analysis, our exogenous variable is the Gulf of Mexico Surface Water Temperature.
 
+**Note:** p, d, q are for trends within one season - P, D, Q are for trends from one season to the next
 
 ## Box-Jenkins: Identification{.smaller background-color="#528B8B"}
 
@@ -730,6 +731,6 @@ Troeger, D. (2022). goodnewsnetwork.org
 ## {background-color="#528B8B"}
 
 ::: {style="font-size: 2.5em; font-weight: bold; text-align: centered"}
-Questions?
+## Questions?
 :::
 
