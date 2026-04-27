@@ -535,20 +535,23 @@ synched_plot
 
 ::: {.columns}
 
-::: {.column width="40%"}
+::: {.column width="60%"}
 
 * **Stationarity of Data**
 * Augmented Dickey-Fuller Test (Unit Root Test)
-* Use the KPSS value (Kwiatkowski-Phillips-Schmidt-Shin)
+* ADF p-value < 0.5
+* KPSS Test (Kwiatkowski-Phillips-Schmidt-Shin)
 * KPSS p-value > 0.05
-* **Nesting Activity, p = 0.09** 
-* **Avg. Temperature, p = 0.10**
-* AutoCorrelation Function (ACF) Plot behavior confirms ADF Test
+* Nesting Activity, p = 0.09 
+* Avg. Temperature, p = 0.10
+* RESULT: Stationary
+* HOWEVER... AutoCorrelation Function (ACF) Plot behavior does NOT confirm Stationarity
+* Highly Seasonal Data can make this happen
 * **RESULT: Non-Stationary**
 
 :::
 
-::: {.column width="60%"}
+::: {.column width="40%"}
 
 ![](ACFnest.png){fig-align="right" height="270px"}
 
@@ -588,8 +591,8 @@ synched_plot
 
 ::: {.column width="50%"}
 
-* **Nest STL Plot**
-* Seasonal and Trend decomposition using Loess (feasts in R)
+* STL Decomposition - Seasonal and Trend decomposition using Loess
+* Log Transform Additive = Multiplicative 
 * Residuals, or Remainder, (Y) not constant over time
 * Residuals grow as number of nests increase
 * **RESULT: MULTIPLICATIVE DECOMPOSITION**
@@ -605,7 +608,7 @@ synched_plot
 
 ![](decompNest.png){fig-align="right" height="275px"}
 
-![](decompTemp.png){fig-align="right" height="275px"}
+![](multiplicativeSTL.png){fig-align="right" height="275px"}
 
 :::
 

@@ -51,6 +51,7 @@ library(broom)
 library(fable.prophet)
 library(gt)
 library(patchwork)
+library(tseries)
 ```
 
 ```{r}
@@ -360,11 +361,11 @@ buoy_tukey_table <- tidy(TukeyHSD(anova_summary)) %>%
             `p-adj` = "Adj. p_value")
 ```
 
-## ABSTRACT
+### ABSTRACT
 
   Are the nesting habits of Loggerhead Turtles predictable? Can we look back on data and external environmental factors, such as sea surface temperature, to forecast what the future has in store for Loggerhead Turtle populations based on the past observed number of nest sites found along the Gulf Coast? The nesting data was collected from Perdido Key, Fort Pickens, Pensacola Beach, and Santa Rosa Beach and we were able to collect Sea Surface Temperature (SST) data from a buoy within an approved proximity to the beaches. Our subject matter consisted of biological data that is highly seasonal. The Time Series Analysis (TSA) process comprises of analyzing seasonal components - both long and short term - within a data series. Therefore, TSA was most suited to decompose the series and synthesize its results. After looking at relationships in the raw data, testing grouping viability (daily vs. monthly), choosing a model to represent the data, and fitting the resultant model to help forecasting efforts, we were able to correctly predict the last two years of monthly nesting counts with a 95% confidence interval even with a dip in the nest counts for 2019. Our final model predicted that nest counts could vary by 4-9 nests each month; however, this finding enables conservationists to allocate their resources more optimally to secure the future population health of Loggerhead turtles. 
 
-## INTRODUCTION
+### INTRODUCTION
 
   This study was a collaborative effort at the University of West Florida; the data was supplied by Dr. Schmutz (Department of Environmental Science) and provided to Dr. Seals (Department of Mathematics and Statistics) to statistically study the nesting habits of Loggerhead Turtles along the Gulf Coast of Florida.
   
@@ -378,11 +379,11 @@ buoy_tukey_table <- tidy(TukeyHSD(anova_summary)) %>%
   
   Our summary of approach includes all of the classical stages of Time Series Analysis plus a few preliminary steps as well as the integrating the Box -Jenkins method. First of all, we have to make sure we have a viable data set. The data set must be built upon a regular interval timeline, e.g., hours, mins, years etc., then we must remove rows that contain erroneous errors. In our case, we had to create a new data set of Sea Surface Temperature and then merge it with the Nesting Count data using the date as the key variable. We now explore the data in its current form using the entire time span by constructing tables and plots to observe whether the data has some inherent relationships. We need to identify our main variable and any exogenous variables within our dataset. The next step is actually the first stage of the Box-Jenkins method. There are 3 stages comprising of Identification, Estimation, and Diagnostic Checks. Within the Identification stage, we determine the Stationarity of the data by testing for its constant mean, variance and autocorrelation. The Augmented Dickey-Fuller test, or Unit Root Test, is used to find the KPSS (Kwiatkowski-Phillips-Schmidt-Shin) p-value which numerically conveys if the data is stationary. We can also observe the ACF (Auto-Correlation Function) plots and use our interpretation as confirmation of the KPSS p-value. We can also determine if there is a seasonality lag associated with data by observing the PACF (Partial Autocorrelation Function) plot. The Estimation stage of the Box-Jenkins method comprises of decomposing the data into Trend, Season, and Residuals/Remainder using an STL (Seasonal and Trend decomposition using Loess) plot, from the feasts (Feature Extraction and Statistics for Time Series) package in R, to determine the whether the data decomposition structure is Multiplicative or Additive. A Multiplicative Decomposition will show that the seasonal variations are proportional to the trend, however, the Additive model's magnitude of the seasonal fluctuations do not depend upon the level of the Trend and will stay about the same. Observing the Trend in STL plot will show if the Trend is linear; if it is not, then one must apply Differencing, (d or D) = 1. If there is a sharp cut-off in the PACF rather than a "tailing off" of the plot spikes, then we may need to apply an AutoRegressive component, p or P. A q or Q component is deemed necessary based upon the remainder in the STL plot as to how well the "shocks" are absorbed during the decomposition of the Trend and Season. One can also find the trend and seasonal strength using the feature function from the feasts package in R; $F_T$ > 0.6 constitutes as a high trend and $F_S$ > 0.7 is high in Seasonality. Remaining in the Estimation Stage of the Box-Jenkins method, we generate a basic automated Model of the main variable using the ARIMA and model functions from the fable package in R; this will provide us with estimated p, d, q, P, D, Q components and define the model, e.g., ARMA, ARIMA, SARIMA, etc. The report function will estimate the coefficients for the Backshift equation with the degree of certainty shown by the z-statistic. At this point, we are at the final stage in the Box-Jenkins method, Diagnostic Checks. We can use the gg_tsresiduals function from the feasts package in R to generate several plots (Innovation Residuals, ACF, and Residuals) for us to interpret the model's fit. Moving along to the next the TSA step, we are now at the point of Training and Validating the model. We will train most of the data, about 80-90%, and use the most recent data as a test set, 10-20%, to confirm if we are able to forecast accurately. We need to select an appropriate model depending on the Trend; if the Trend was not horizontal, we need to explore non-linear models and identify which has the best fit. We will gauge our model's best fit by selecting the model with the lowest AIC (Akaike Information Criterion) value to yield the most parsimonious representation of the data. Lastly, forecasting the model will present whether it successfully lies within the 95% Confidence Interval (or 5% significance) using the forecast function from the fable package in R. The Ljung-Box Residual Test will generate a quality-of-fit p-value which describes how well the Residuals emulate White Noise. Also, the Residual's Root Mean Squared Error and Mean Average Error will be calculated to show how far our forecasts are from the observed data.
   
-## METHODS
+### METHODS
 
-### DATA ACQUISITION AND SOURCES
+#### DATA ACQUISITION AND SOURCES
 
-  Data was collected from 1998 to 2020 and prime nesting season was defined from May through the end of September. When a nest was discovered, it immediately populated a date and the unique longitude and latitude of the nesting spot within the dataset; other variables included were the beach that the nest was spotted and the species of turtle that made the nest. Water temperature was added from a buoy that had a complete set of data and within the immediate area of the Gulf beaches. The temperature data was added to investigate if it has any relationship when the nesting season begins or ends.
+  Data was collected from 1998 to 2020 and prime nesting season was defined from May through the end of September. When a nest was discovered, it immediately populated a date and the unique longitude and latitude of the nesting spot within the dataset; other variables included were the beach that the nest was spotted and the species of turtle that made the nest. Water temperature was added from a buoy that had a complete set of data and within the immediate area of the Gulf beaches. The temperature data was added to investigate if it has any relationship between when the nesting season begins or ends.
 
   The original dataset contains initials of the locations and species, see below for their full meanings:
 
@@ -395,16 +396,18 @@ buoy_tukey_table <- tidy(TukeyHSD(anova_summary)) %>%
 - "DC" - "Dermochelys coriacea", Leatherback Turtle
 - "LK" - "Lepidochelys kempii", Kemp's Riley Turtle
 
-  Although 4 turtle species were identified in the study, our primary focus was on the Loggerhead Turtle, Carrera carrera. The table below shows the final dataset columns.
+  Although 4 turtle species were identified in the study, our primary focus was on the Loggerhead Turtle, Carrera carrera. @tbl-CCdata-table shows the final dataset columns. 
 
 ```{r}
 #| label: tbl-CCdata-table
 #| tbl-cap: "Data Table (with Surface Water Temperature) of the Nesting Habits of Loggerhead Turtles: 1988-2020 (Partial)"
+#| fig-align: center
 #| echo: false
 kable_table_CConly
 ```
+Individual yearly plots were generated to show the yearly nesting patterns compared to the 22-year average (see @fig-ind-plots). 
 
-ADDITIONAL DATA
+**ADDITIONAL DATA**
 
   Our team decided that we needed temperature data to support the nesting data because turtles react to thermal cues (ectothemic). Dr. Schmutz found that there are many buoys in the region of study along the Gulf Coast [@ndbc]. Dr. Schmutz picked two buoys (42012 and 42028) to pair their temperature data with the dates of new nest discovery. Unfortunately, these data sets were incomplete for our needs; the temperature data did not go back 22 years for either buoy. We were able to look further out into the Gulf and found Station PCLF1 and 42039. Station 42028 was dropped from consideration since there was too little data (only 2026 data). We statistically compared PCLF1, 42012, and 42039 with each other to make sure we could use Station 42039 in our analysis.
 
@@ -437,11 +440,12 @@ buoy_table <- buoy_info %>%
 ```{r}
 #| label: tbl-buoy-table
 #| tbl-cap: "Table of Station Information"
+#| tbl-align: center
 #| echo: false
 buoy_table
 ```
 
-ANOVA COMPARISON
+**ANOVA COMPARISON**
 
   Station 42012, PCLF1, and 42039 were statistically compared using the ANOVA comparison algorithm; the results proved that we would be able to use Station 42039. The *p-value* was less than 0.05 for the comparison between Stations 42012 and 42039 (Orange Beach and Pensacola South) and, also, for the comparison between Stations PCLF1 and 42039 (Pensacola NAS and Pensacola South) which makes the result extremely significant (see @tbl-buoy-tukey-table). The average differences between the station temperature of interest (Pensacola South) and the other Stations was 0.214-0.227 deg Celsius.
 
@@ -449,12 +453,14 @@ ANOVA COMPARISON
 #| label: tbl-buoy-tukey-table
 #| tbl-cap: "Tukey HSD Comparison of Mean Water Temperatures"
 #| echo: false
+#| tbl-align: center
 buoy_tukey_table
 ```
 
 ```{r}
 #| label: fig-buoy-comp
 #| fig-cap: "Comparison of Three Temperature Buoys/deg.C"
+#| fig-align: center
 buoy_comp
 ```
 
@@ -463,15 +469,16 @@ Dr. Schmutz approved of the analysis such that Station 42039 could be used even 
 ```{r}
 #| label: fig-spatial
 #| fig-cap: Spatial Mapping Of Loggerhead Nesting Sites including Station 42039 Buoy Location
+#| fig-align: center
 spatial_plot
 ```
 
-## MATHEMATICAL AND STATISTICAL MODELLING
+#### MATHEMATICAL AND STATISTICAL MODELLING
 
 Overall, Time Series Analysis follows a systematic and layered methodology where each layer can strengthen the fit and forecast of the overall model. The main steps of the analysis includes Exploratory Data Analysis and Visualizations, ascertaining the Stationarity of Data, Decomposition Determination, Model Selection, Training and Validation of the model, Forecasting, and Residual Analysis to provide final verification Metrics.
 
 
-### EXPLORATORY DATA ANALYSIS AND VISUALIZATIONS
+**EXPLORATORY DATA ANALYSIS AND VISUALIZATIONS**
 
 The first series of analysis involves 
 
@@ -479,24 +486,102 @@ The first series of analysis involves
 -   looking for patterns in the data and how the data changes over time
 -   interpreting whether it contains a Trend or any Seasonality. 
 
-At this point, we also need to identify outliers and if they are significant for the overall analysis or whether they should be trimmed. It is also important to find any data that could be interpreted as "not applicable" which would also skew the analysis with erroneous results, for example, some data points may have "n/a", "na", or a blank/missing value while others may put a number or letter sequence that would not match with the rest of the data. 
+At this point, we also need to identify outliers and decide if they are significant for the overall analysis or whether they should be trimmed. It is also important to find any data that could be interpreted as "not applicable" which would also skew the analysis with erroneous results, for example, some data points may have "n/a", "na", or a blank/missing value while others may put a number or letter sequence that would not match with the rest of the data. In our data, we found "999" for erroneous readings in the temperature data and blank spaces in the nesting data all of which were filtered out.
 
-These errors in the data may not be discovered until plotting results. Checking for linear relationships between two columns at a time may reveal mistakes in the data set or erroneous values. I was able to determine that several pairs of longitude and latitude points were incorrectly recorded based on a simple spatial mapping plot of longitude vs latitude. Since this is a collaborative effort with Dr. Schmutz (Professor of Earth and Environmental Science, UWF), he was notified so that he could make the decision to omit the data or correct it; negative signs were missing from the longitude data and he decided to correct them. We found that all erroneous temperature readings recorded from the buoy were the number '999' and so this had to be filtered out too because the data would definitely be skewed. [we excluded any erroneous values]
+**STATIONARITY OF DATA**
+
+There are 3 rules for strict stationarity - a constant mean, constant variance and constant correlation. Constant Mean can manifest as an upward or downward trend denoting that the series is not stationary. Constant Variance shows the volatility of the spread of the data that should stay consistent over the series. Increased deviations (fluctuations) from the average as the series progresses shows non-stationarity. Constant Autocorrelation specifies looking at time t and t-1 and the extent to which they differ; the difference of the internal structure/statistical properties of the data should be constant and not significantly change over time.
+
+The Augmented Dickey-Fuller (ADF) Test, also known as the Unit Root Test, reveals whether the data is Stationary based on a resulting p-value. The Null Hypothesis for the ADF Test is that the data is non-stationary; if the p-value < 0.05, then we Reject the Null Hypothesis and data is deemed stationary. For the KPSS p-value, the opposite is true. The Null Hypothesis for the KPSS Test is that the data is stationary; if the p-value $\ge$ 0.05, then we Reject the Null Hypothesis and data is deemed non-stationary.
+
+An ACF Plot will be generated to show the relationships within the data by observing the prominence and regularity of the plot's spikes, if the mean is shifting over time by analyzing the correlation between data and lags, and whether Differencing is required to achieve stationarity. 
+
+**DECOMPOSITION DETERMINATION**
+
+Classical Decomposition Methods comprise of two main methods: Additive (1) and Multiplicative (2). For additive decomposition, the magnitude of the seasonal fluctuations (or variation about the trend) are not expected to vary with the level of the time series as the data grows, or shrinks, over time. Essentially, we are assuming that there will be a constant absolute magnitude about which there will be seasonal fluctuations. An additive model's graphical representation will show that there will be parallel peaks and troughs with a consistently even width between them, respectively, even though the overall graph may be showing a positive or negative correlation. The components ($S$, $T$, $R$) are proven to be independent by performing an additive decomposition and checking to see how $R$ (remainder/noise) performs - if $R$ remains fairly consistent, then an additive decomposition is needed; however, if $R$ oscillates and increases in magnitude (and continues to do so) then the multiplicative decomposition has to be used.
+
+$$\begin{equation} 
+y_t = S_t + T_t + R_t 
+\end{equation}$$
+where S=Seasonal, T=Trend, R=Residuals/Noise at time *t*
+
+The multiplicative decomposition is used when the the magnitude of the seasonal fluctuations are proportional to the level of the time series. Essentially, there is a percentage change between the start and the end of each season and, as  aforementioned, the residuals are checked for continually increasing oscillations.
+
+$$\begin{equation} 
+y_t = S_t \times T_t \times R_t 
+\end{equation}$$
+where y=Observation, S=Seasonal, T=Trend, R=Residuals/Noise at time *t*
+
+"STL is a versatile and robust method for decomposing time series"[@fpp3]. STL using Loess is an acronym for Seasonal-Trend decomposition using Locally Estimated Scatterplot Smoothing. Each $S$, $T$, and $R$ component is extracted from the observed data and plotted. When rendering the plot for the STL decomposition on an observed data, it is inherently additive; however, one can take the log of the observed data (and add a constant, if necessary, to aid convergence) and produce a multiplicative decomposition. We then  compare the two renderings. One must conduct a comparison of the Remainder, $R$, to decipher which plot more closely resembles White Noise. Another observation in the STL is taking note as to how the Trend handles "shocks" in data. If the Trend is able to smooth over a "shock" in the data, then the "shock" has been successfully transferred to the Remainder; if it can not, then it is called "Leakage' and the Trend absorbs the anomaly causing the Trend line to become look more unstable.
 
 
-### STATIONARITY OF DATA
+The Trend Strength, $F_t$, is the comparison of Remainder ($R_t$) versus the variance of the Data-without-Trend ($T_t + R_t$) and how much data volatility there is in the long term. 
 
-3 rules for strict stationarity...
+$$\begin{equation}
+F_m = max(0,1-[Var(R_t)/Var(m_t + R_t)])
+\end{equation}$$
+where F=Strength, m=Trend, R=Residuals/Noise at time *t*
 
-Constant Mean - an upward or downward trend denotes that the series is not stationary.
+The Seasonal Strength, $F_S$, is the comparison of Remainder ($R_t$) versus the reduction in variance of the Seasonally-Adjusted data ($S_t + R_t$) after the Trend has been removed.
 
-Constant Variance - the volatility of the spread of the data should stay consistent over the series. Increased deviations (fluctuations) from the average as the series progresses shows non-stationarity. 
+$$\begin{equation}
+F_s = max(0,1-[Var(R_t)/Var(s_t + R_t)])
+\end{equation}$$
+where F=Strength, s=seasonal, R=Residuals/Noise at time *t*
 
-Constant Autocorrelation - looking at time t and t-1 and the how they differ; the difference of the internal structure/statistical properties of the data should be constant and not significantly change over time.
+Both Strengths can be computed using the features function in the feasts package in R.
 
-The Augmented Dickey-Fuller (ADF) Test shows whether the data is Stationary based on a resulting p-value. A Time Series Plot will confirm the p-value of the ADF.
+
+**MODEL SELECTION**
+
+SARIMAX (Seasonal Autoregressive Integrated Moving Average with an Exogenous Variable) is a comprehensive time series analysis that is a combination of seasonality, autoregression, differencing, moving average and is also a forecasting method that is well suited to a biological analysis. It is an extension of the ARIMA framework that incorporates the annual seasonality of biological data and the exogenous variable of water temperature. Also, like ARIMA, SARIMAX analysis data has to be proven stationary by testing its mean and variance to ensure that future predictions are based solidly on historical pattern recognition. The S (Seasonal) Component represents the regular intervals at which a relationship can be identified and is to be expected using biological data, i.e., finding the natural rythmn of the model. The AR (Autoregressive) Component, p or P, involves the model using the relationship of the variable with its own previous values (or lagged observations). The I (Integrated) Component, d, helps to stabilize the mean and remove trends from the time series analysis and makes it stationary by differencing (d or D). The MA (Moving Average) Component, q or Q, represents the effect of previous error terms on the present value of the time series. The X (eXogenous) Component is an external variable that can help fill in the gaps of past behaviour of the data to soften fluctuations and strengthen future predictions. For this analysis, our exogenous variable is the Gulf of Mexico Surface Water Temperature. The SARIMAX model is mathematically represented using a Backshift (B) notation where $By_t=y_{t-1}$:
+    
+$$\begin{equation} 
+    \Phi_P(B^s)\phi_p(B)\nabla^d\nabla_s^Dy_t=\beta x_t+\Theta_Q (B^s)\theta_q(B)\epsilon_t
+\end{equation}$$    
+
+where $y_t$ is the Dependent Variable, total nesting count; $x_t$ is the Exogenous Variable, surface water temperature; $\beta$ is the Coefficient, quantifies impact of water temperature on nesting activity; $\nabla^d$ and $\nabla_s^D$ are the Differencing Operators; $\phi_p$ and $\Phi_P$ are the AR(p) and SAR(P) Components; $\theta_q$ and $\Theta_Q$ are the MA(q) and SMA(Q) Components, and $\epsilon_t$ is the White Noise (error term).
+
+The Box-Jenkins time series method will be used and has three steps that the time series analysis can be run through iteratively. The 'Identification' stage determines the order of the Seasonal and non-seasonal AR, I and MA components that are appropriate for the time series and where the eXogenous variable is incorporated. Within this step, there is a Stationarity Check for stability using the mean and variance of the model and this includes determining the Seasonal Stationarity. If there are significant fluntuations in the Mean (from analyzing the peaks and troughs), Seasonal Differencing(D) is needed as well as Standard Differencing (d). Next, the Autocorrelation and Partial Autocorrelation Analysis (ACF and PACF) plots are generated to identify model lags or Seasonal Spikes (most probably a multiple of 12). The spikes will be used to identify the Seasonal Autoregressive (P) and Seasonal Moving Average (Q). The Seasonality Check of the data is to confirm that there is a repeating 12-month pattern, or biological cycle where s=12, thus, validating the "S" component in SARIMAX. The relationship between the Exogenous Variable (X) and the time series nedds to be identified appropriately such that it is statistically relavent and aligned (may have to impose a lag) to the overall model and can help explain the model's behaviour. The 'Estimation' stage is where the a model is selected based on the identified seasonal and non-seasonal parameters $(p, d, q)$ x $(P,D,Q)_s$. The AR and MA lags are also selected based on the ACF and PACF found in the previous identification step. The non-seasonal AR ($\phi$) and MA coefficients ($\theta$) will be designated as well as the seasonal AR ($\Phi$) and MA ($\Theta$) coefficients, if they exist. Lastly, for this step, the SARIMAX model's exogenous variable coefficient ($\beta$) can be estimated. All of these parameters will be applied and the model generates the fitted values to synthesize its unique historical behavior and predictive nature while amalgamating its historic patterns with the exogenous temperature data. The Akaike Information Criterion (AIC) will be used to make a parsimonious model to ensure accuracy using as few parameters as possible - too many parameters can diminish the model's optimization. The 'Diagnostic Check' stage involves investigating the residuals (the difference between the predicted SARIMAX values and observed data) to ensure no additional patterns are left in the error/residual terms; the residuals should resemble "white noise" randomness. Next, the Ljung-Box Test is utilized to check to see if the residuals areas desired, i.e., random, followed by a mean and variance check; the desired outcome is that the residuals have a mean about zero and a variance that is constant (homoscedasticity) confirming that the residuals do not grow or shrink over time. Also, the residuals are compared to the water temperature data to make sure that they do not correlate; if this is the case, its coefficient will have to be re-estimated. Finally, the term Iterative Refinement is used to describe the process for going back through the steps so far if the previous checks raised any issues.
+        
+A PACF Plot will be generated to determine the order of the standard AR (p) and the seasonal AR (P) via a "cut-off" point. A lag number will automatically be assigned for the SARIMAX model and the cut-off point should match this. This number is predicted to be 12 since we are looking at biological data. Therefore, we will be paying attention to whether the cut-off at the beginning of the plot is 12 which can lead to P being initially assigned a 1. An ACF Plot will be generated to show the relationships within the data with respect to Seasonality and Non-stationary Trends. We will also be observing the prominence and regularity of the plot's spikes, if the mean is shifting over time by analyzing the correlation between data and lags, and whether Differencing is required to achieve stationarity. 
+
+The automatic base model for ARIMA is of the format, $ARIMA(p,d,q)(P,D,Q)_{Lag}$ but we can add further meaning by adding $S$ for Seasonality and an $X$ to denote the fact that an exogenous variable has been included in the model; it is represented as follows $SARIMAX(p,d,q)(P,D,Q)_{Lag}$.
+
+**TRAINING AND VALIDATION**
+
+Based on my research, SARIMAX, Fourier series, and Prophet all handle non-linear, highly seasonal data well. "Neigbouring" of the SARIMAX model will be used to make sure that a slight adjustment will not provide a better model. SARIMAX uses lags to its advantage and assumes high correlation with the previous 12-month instance to its current observation. It utilizes the Seasonal Moving Average or Seasonal Autoregressive terms by "remembering" historical biological patterns and distinguishing between a surge or an anomaly by taking full advantage of the environmental influence, i.e., the exogenous variable, of water temperature. The Fourier Series is used in combination with ARIMA to create a Dynamic Harmonic Regression model. The Dynamic attribute uses ARMA to handle errors or "memory" in the data. The harmonic attribute explains how it is an approximation model that breaks down the data into the sum of sine and cosine functions to handle the seasonality component to aid in mapping a predictable cycle. The Regression attribute refers to the exogenous data and handles piece-wise shifts in nesting activities. The Fourier Series allows for a relaxed approach to defining biological seasonal cycles and is an excellent choice for biological data. "Prophet" was designed by the Data Science Team at Meta to handle fluctuations of business and biological data within time series analysis. Prophet decomposes the time series model using a Generalized Additive Model, or GAM, y(t) by Trend, g(t), Seasonality, s(t), Holidays/Events (e.g, Environmental Disasters), h(t), and an Error term, $\epsilon_t$ - $ y(t)=g(t)+s(t)+h(t)+\epsilon_t $ - it then looks at the series and adjusts curves to show the relationship rather than analyzing the actual relationship between the data points. Prophet is known to handle missing data, more resilient to outliers, and extra exogenous variables can be added. It also incorporates the Fourier Series for the Seasonal aspect to generate a smoothed seasonal cycle. "Neighboring", or Stepwise Evaluation of Neighboring Parameters, can be used as a comparison to validate the correctness of the chosen model, e.g., changing p=0 (no immediate memory) to p=1 (1 month memory). Depending on what the SARIMAX model is, I will research what its "neighbor" should be and then test to make sure it is not better than the chosen model. There is also a balance to maintain between the simplicity and the accuracy of the model - one make the model as parsimonious as possible with the fewest number of parameters whilst maintaining accuracy. Exponential Smoothing was considered but upon further research, it was not a good candidate because it can not handle the exogenous data well.
+
+
+**METRICS**
+
+The metrics discussed here will be encountered and used to guide conclusions in our results section. The AIC (Akaike Information Criterion) score is used to find the most parsimonious (efficient and simple) model from all of these methods; the lowest AIC score is usually the best but have to check the parameter count. The "ma" coefficients are the Moving Average coefficients are used to correct predictions from the previous point of the forecast, more likely to be a monthly forecast. The "sma" coefficients are Seasonal Moving Average coefficients that handle correcting predictions from the previous point of the forecast, more likely to be a yearly forecast.
+The "s.e.", or Standard Error, measures the reliability of ALL of the coefficients generated. The z-statistic explains the significance of the coefficients; if |z|.1.96, the coefficients are significant. The "sigma2", or $\sigma^2$, is the variance of the residuals, or remaining noise, in the model that can not be explained. A lower $\sigma^2$ suggests a better, tighter fit. The "RMSE" or Root Mean Squared Error, is the measure of trust in the model's predictions. It averages the distance between the model's predictions against the original observed data. The RMSE will be in the same units as the data which, in our case, is number of nests per month.
+
+**FORECASTING AND RESIDUAL ANALYSIS**
+
+We will be Training and Testing the first 20 years (1988-1998) of the data to develop the training model and the last two years of the data will be used as the test set for each model's forecasting capabilities. This is called the "Out-of-Sample Validation".
+Our Forecasting will be a probabilistic estimate of what the future of the model will look like based on the patterns learned during training. Point Forecasts that offer its best estimate as to where future data points will reside in future months. Prediction Intervals consist of 80% and 95% uncertainty ranges that show the variability in nesting counts based on past learning of fluctuations or "environmental shocks". The Residual Analysis is performed after forecasting and their behaviour will be compared to "White Noise". They will be verified using a Ljung-Box Test and a Residual Histogram to check for model bias and the residuals are at a minimum.
+
+
+## SOFTWARE AND TOOLS
+
+- R Programming Environment - widely used for time series analysis.
+- fpp3 "Forecasting:Principles and Practice" meta-package.
+- tsibble - creation and management of data frames.
+- feasts - "Feature Extraction and Statistics for Time Series", used for calculating the Ljung-Box p-value.
+- fable - primary modeling entity for defining, estimating, and forecasting SARIMAX and Fourier ARIMA models.
+- fable.prophet - to incorporate the Generalized Additive Model (GAM)
+- STL method - Seasonal-Trend decomposition using Loess (Locally Estimated Scatterplot Smoothing).
+
+
+#### RESULTS
+
+Our Exploratory data analysis and visualizations revealed many basic results. The tables and plots for these are contained in the "Additional Tables and Visualizations" section. The highest number of nesting sites occurred in 2017 (see @fig-total-nesting-year). Perdido Key had the most nesting sites (see @fig-beach-table). July was the aggregated top month for nesting sites (see @fig-top-month). The seasonality of the data can be observed (see @tbl-CCseason-table). The ANOVA results using Tukey Honest Significant Difference (HSD) or Comparison of the Means (95% confidence level) to compare the different Weather Buoys in the Gulf (see @tbl-buoy-tukey-table). Relative Relationship between nesting activity and average monthly temperatures show a high correlation (see @fig-relative-nest-temp). 
+
+The plot in @fig-synched-plot shows the relationship between the water temperature and nesting activity. The water temperature was scaled and the nesting activity was normalized so that they could use the same Relative Intensity scale. Upon examination of the plot, one can see that the relationship shown for years 2013-2017 looks more ideal than anywhere else on the plot; the cooler temperatures in the Winter and the warmer temperatures in the Summer are clearly shown as well as the correlation of the rising temperatures with the increase in nesting activity. Otherwise, we can conclude warmer Winters in 2004-2005, 2006-2007 and 2009, and a cooler than normal Summer in 2012 (also the lowest nest count in our series).
 ```{r}
-# Found Duplicate Dates
+# Test for Duplicate Dates - there were some, need to filter them out
 #turtle_tsibble <- all_data %>%
 #  duplicates(index = C_Date)
 #turtle_tsibble
@@ -571,159 +656,7 @@ Relative_Nest_vs_Temp <- SARIMAX_table %>%
        color = "Variable") +
   theme_minimal()
 ```
-
-### DECOMPOSITION DETERMINATION
-
-Classical Decomposition Methods comprise of the Additive method and the Multiplicative method. 
-
-For additive decomposition, the magnitude of the seasonal fluctuations (or variation about the trend) are not expected to vary with the level of the time series as the data grows, or shrinks, over time. Essentially, we are assuming that there will be a constant absolute magnitude about which there will be seasonal fluctuations. 
-
-An additive model's graphical representation will show that there will be parallel peaks and troughs with a consistently even width between them, respectively, even though the overall graph may be showing a positive or negative correlation. 
-
-The components (S,T,R) are proven to be independent by performing an additive decomposition and checking to see how R performs - if R (remainder/noise) remains fairly consistent, then an additive decomposition is needed; however, if R oscillates and increases in magnitude (and continues to do so) then the multiplicative decomposition has to be used.
-
-$$\begin{equation} 
-
-y_t = S_t + T_t + R_t 
-
-\end{equation}$$
-where S=Seasonal, T=Trend, R=Residuals/Noise at time *t*
-
-The multiplicative decomposition is used when the the magnitude of the seasonal fluctuations are proportional to the level of the time series. Essentially, there is a percentage change between the start and the end of each season and, as  aforementioned, the residuals are checked for continually increasing oscillations.
-
-$$\begin{equation} 
-
-y_t = S_t \times T_t \times R_t 
-    
-\end{equation}$$
-
-The STL method in R - Seasonal-Trend decomposition using Loess (Locally Estimated Scatterplot Smoothing) to show the breakdown of S, T and R.
-
-The Trend Strength, $F_t$, is the comparison of Remainder ($R_t$) versus the variance of the Data-without-Trend ($T_t + R_t$) and how much data volatility there is in the long term.
-
-$$\begin{equation}
-
-F_m = max(0,1-[Var(R_t)/Var(m_t + R_t)])
-
-\end{equation}$$
-
-The Seasonal Strength, $F_s$, is the comparison of Remainder ($Y_t$) versus the reduction in variance of the Seasonally-Adjusted data ($S_t + R_t$) after the Trend has been removed.
-
-$$\begin{equation}
-
-F_s = max(0,1-[Var(R_t)/Var(s_t + R_t)])
-
-\end{equation}$$
-
-
-### MODEL SELECTION
-
--   SARIMAX (Seasonal Autoregressive Integrated Moving Average with an Exogenous Variable) is a comprehensive time series analysis that is a combination of seasonality, autoregression, differencing, moving average and is also a forecasting method that is well suited to a biological analysis. It is an extension of the ARIMA framework that incorporates the annual seasonality of biological data and the exogenous variable of water temperature. Also, like ARIMA, SARIMAX analysis data has to be proven stationary by testing its mean and variance to ensure that future predictions are based solidly on historical pattern recognition. 
-    
-    -   The S (Seasonal) Component represents the **regular intervals** at which a relationship can be identified and is to be expected using biological data, i.e., finding the natural rythmn of the model.
-    -   The AR (Autoregressive) Component, p, involves the model using the relationship of the variable with its own **previous values** (or lagged observations).
-    -   The I (Integrated) Component, d, helps to **stabilize the mean** and remove trends from the time series analysis and makes it stationary by differencing (d).
-    -   The MA (Moving Average) Component, q, represents the effect of **previous error** terms on the present value of the time series.
-    -   The X (eXogenous) Component is an **external variable** that can help fill in the gaps of past behaviour of the data to soften fluctuations and strengthen future predictions. For this analysis, our exogenous variable is the Gulf of Mexico Surface Water Temperature.
-    
-    -   The SARIMAX model is mathematically represented using a Backshift (B) notation where $By_t=y_{t-1}$:
-    
-$$ 
-    \Phi_P(B^s)\phi_p(B)\nabla^d\nabla_s^Dy_t=\beta x_t+\Theta_Q (B^s)\theta_q(B)\epsilon_t
-$$    
-
-**-** $y_t$: Dependent Variable, total nesting count  
-
-**-**  $x_t$: Exogenous Variable, surface water temperature  
-
-**-**  $\beta$: Coefficient, quantifies impact of water temperature on nesting activity 
-
-**-**  $\nabla^d$ **and** $\nabla_s^D$: Differencing Operators  
-
-**-**  $\phi_p$ **and** $\Phi_P$: AR(p) and SAR(P) Components  
-
-**-**  $\theta_q$ **and** $\Theta_Q$: MA(q) and SMA(Q) Components  
-
-**-**  $\epsilon_t$: White Noise (error term)
-
-**Box-Jenkins time series method** has three steps that the time series analysis can be run through iteratively.
-
-    -   **Step 1: Identification** determines the order of the Seasonal and non-seasonal AR, I and MA components that are appropriate for the time series and where the eXogenous variable is incorporated. Within this step, there is a Stationarity Check for stability using the mean and variance of the model and this includes determining the Seasonal Stationarity. If there are significant fluntuations in the Mean (from analyzing the peaks and troughs), Seasonal Differencing(D) is needed as well as Standard Differencing (d). Next, the Autocorrelation and Partial Autocorrelation Analysis (ACF and PACF) plots are generated to identify model lags or Seasonal Spikes (most probably a multiple of 12). The spikes will be used to identify the Seasonal Autoregressive (P) and Seasonal Moving Average (Q). The Seasonality Check of the data is to confirm that there is a repeating 12-month pattern, or biological cycle where s=12, thus, validating the "S" component in SARIMAX. The relationship between the Exogenous Variable (X) and the time series nedds to be identified appropriately such that it is statistically relavent and aligned (may have to impose a lag) to the overall model and can help explain the model's behaviour. 
-        
-    -   **Step 2: Estimation** is where the a model is selected based on the identified seasonal and non-seasonal parameters $(p, d, q)$ x $(P,D,Q)_s$. The AR and MA lags are also selected based on the ACF and PACF found in the previous identification step. The non-seasonal AR ($\phi$) and MA coefficients ($\theta$) will be designated as well as the seasonal AR ($\Phi$) and MA ($\Theta$) coefficients, if they exist. Lastly, for this step, the SARIMAX model's exogenous variable coefficient ($\beta$) can be estimated. All of these parameters will be applied and the model generates the fitted values to synthesize its unique historical behavior and predictive nature while amalgamating its historic patterns with the exogenous temperature data. The Akaike Information Criterion (AIC) will be used to make a parsimonious model to ensure accuracy using as few parameters as possible - too many parameters can diminish the model's optimization. 
-        
-    -   **Step 3: Diagnostic Checking** involves investigating the residuals (the difference between the predicted SARIMAX values and observed data) to ensure no additional patterns are left in the error/residual terms; the residuals should resemble "white noise" randomness. Next, the
-        **Ljung-Box Test** is utilized to check to see if the residuals are
-        as desired, i.e., random, followed by a mean and variance
-        check; the desired outcome is that the residuals have a mean
-        close to zero and a variance that is constant (homoskedasticity) confirming that the residuals do not grow or shrink over time. Also, the residuals are compared to the water temperature data to make sure that they do not correlate; if this is the case, its coefficient will have to be re-estimated. Finally, the term
-        Iterative Refinement is used to describe the process for going
-        back through the steps so far if the previous checks raised any
-        issues.
-        
-An **ACF Plot** will be generated to show the relationships within the data with respect to Seasonality and Non-stationary Trends. We will also be observing the prominence and regularity of the plot's spikes, if the mean is shifting over time by analyzing the correlation between data and lags, and whether Differencing is required to achieve stationarity.
-
-A **PACF Plot** will be generated to determine the order of the standard AR (p) and the seasonal AR (P) via a "cut-off" point. A lag number will automatically be assigned for the SARIMAX model and the cut-off point should match this. This number is predicted to be 12 since we are looking at biological data. Therefore, we will be paying attention to whether the cut-off at the beginning of the plot is 12 which can lead to P being initially assigned a 1.
-
-The automatic base model for ARIMA that is used during programming is of the format:
-$$ ARIMA(p,d,q)(P,D,Q)_{Lag}$$
-but is written within the report as:
-$$ SARIMAX(p,d,q)(P,D,Q)_{Lag}$$
-
-### TRAINING AND VALIDATION
-
-Based on my research, SARIMAX, Fourier series, and Prophet all handle non-linear, highly seasonal data well. "Neigbouring" of the SARIMAX model will be used to make sure that a slight adjustment will not provide a better model. 
-
-  - **SARIMAX** uses lags to its advantage and assumes high correlation with the previous 12-month instance to its current observation. It utilizes the Seasonal Moving Average or Seasonal Autoregressive terms by "remembering" historical biological patterns and distinguishing between a surge or an anomaly by taking full advantage of the environmental influence, i.e., the exogenous variable, of water temperature. 
-
-  - **Fourier Series** is used in combination with ARIMA to create a Dynamic Harmonic Regression model. The Dynamic attribute uses ARMA to handle errors or "memory" in the data. The harmonic attribute explains how it is an approximation model that breaks down the data into the sum of sine and cosine functions to handle the seasonality component to aid in mapping a predictable cycle. The Regression attribute refers to the exogenous data and handles piece-wise shifts in nesting activities. The Fourier Series allows for a relaxed approach to defining biological seasonal cycles and is an excellent choice for biological data. 
   
-  - **"Prophet"** was designed by the Data Science Team at Meta to handle fluctuations of business and biological data within time series analysis. Prophet decomposes the time series model using a Generalized Additive Model, or GAM, y(t) by Trend, g(t), Seasonality, s(t), Holidays/Events (e.g, Environmental Disasters), h(t), and an Error term, $\epsilon_t$ - $ y(t)=g(t)+s(t)+h(t)+\epsilon_t $ - it then looks at the series and adjusts curves to show the relationship rather than analyzing the actual relationship between the data points. Prophet is known to handle missing data, more resilient to outliers, and extra exogenous variables can be added. It also incorporates the Fourier Series for the Seasonal aspect to generate a smoothed seasonal cycle. 
-  
-  - **"Neighboring"**, or Stepwise Evaluation of Neighboring Parameters, can be used as a comparison to validate the correctness of the chosen model, e.g., changing p=0 (no immediate memory) to p=1 (1 month memory). Depending on what the SARIMAX model is, I will research what its "neighbor" should be and then test to make sure it is not better than the chosen model. There is also a balance to maintain between the simplicity and the accuracy of the model - one make the model as parsimonious as possible with the fewest number of parameters whilst maintaining accuracy.
-
-- **Note:** Exponential Smoothing was considered but upon further research, it was not a good candidate because it can not handle the exogenous data well although it can generally handle outliers better than SARIMAX.
-
-
-### METRICS
-
-**AIC (Akaike Information Criterion) score:** used to find the most parsimonious (efficient and simple) model from all of these methods; the lowest AIC score is usually the best but have to check the parameter count.
-**"ma" coefficients:** Moving Average coefficients are used to correct predictions from the previous point of the forecast, more likely to be a monthly forecast.
-**"sma" coefficient:** Seasonal Moving Average coefficients handles  correcting predictions from the previous point of the forecast, more likely to be a yearly forecast.
-**s.e. - Standard Error** measures the reliability of ALL of the coefficients generated. As a rule, if the coefficient being compared is roughly double that of the standard error, the coefficient is deemed statistically significant corresponding to a $p-value$ of 0.05.
-**sigma2 - $\sigma^2$** is the variance of the residuals, or remaining noise, in the model that can not be explained. A lower $\sigma^2$ suggests a better, tighter fit.
-**RMSE - Root Mean Squared Error** is a measure of trust in the model's predictions. It averages the distance between the model's predictions against the original observed data. The RMSE will be in the same units as the data which, in our case, is number of nests.
-
-### FORECASTING AND RESIDUAL ANALYSIS
-
-**Train and Test** - we will use the first 21 years (1988-1999) of the data to develop the training model and the last year year of data will be used as the test set for each model's forecasting capabilities. This is called the "Out-of-Sample Validation".
-**Forecasting** - this is a probabilistic estimate of what the future of the model will look like based on the patterns learned during training. Point Forecasts that offer its best estimate as to where future data points will reside in future months. Prediction Intervals consist of 80% and 95% uncertainty ranges that show the variability in nesting counts based on past learning of fluctuations or "environmental shocks".
-**Residual Analysis** - after forecasting, the residuals behaviour will be compared to "White Noise" and will be verified using a Ljung-Box Test and a Residual Histogram to check for model bias and that the residuals are at a minimum.
-
-
-## SOFTWARE AND TOOLS
-
-- R Programming Environment - widely used for time series analysis.
-- fpp3 "Forecasting:Principles and Practice" meta-package.
-- tsibble - creation and management of data frames.
-- feasts - "Feature Extraction and Statistics for Time Series", used for calculating the Ljung-Box p-value.
-- fable - primary modeling entity for defining, estimating, and forecasting SARIMAX and Fourier ARIMA models.
-- fable.prophet - to incorporate the Generalized Additive Model (GAM)
-- STL method - Seasonal-Trend decomposition using Loess (Locally Estimated Scatterplot Smoothing).
-
-
-## RESULTS
-
-### EXPLORATORY DATA AND VISUALIZATIONS
-
-  Individual yearly plots were generated to show the yearly nesting patterns compared to the 22-year average (see @fig-ind-plots).
-  2017 had the highest number of nesting sites (see @fig-total-nesting-year)
-  Perdido Key had the most nesting sites (see @fig-beach-table) 
-  July was the aggregated top month for nesting sites (see @fig-top-month)
-  The seasonality of the data can be observed (see@tbl-CCseason-table)
-  ANOVA results using Tukey Honest Significant Difference (HSD) or Comparison of the Means (95% confidence level), (see @tbl-buoy-tukey-table)
-  Relative Relationship between Nesting Activity and Average monthly temperatures show a high correlation (see @fig-relative-nest-temp).
-  The plot, shown below, shows the relationship between the water temperature and nesting activity. The water temperature was scaled and the nesting activity was normalized so that they could use the same Relative Intensity scale.
 ```{r}
 synched_plot <- SARIMAX_table %>%
   # normalized total_per_month to a 0-1 scale to overlay
@@ -747,26 +680,47 @@ synched_plot <- SARIMAX_table %>%
   theme_minimal() +
   theme(legend.position = "bottom") +
   theme(panel.background = element_rect(fill = "aliceblue", color = "black"))
+```
+
+```{r}
+#| label: fig-synched-plot
+#| fig-cap: "Synchronized Relationship of Nesting Activity vs Average Temperatures, 1988-2020"
+#| fig-align: center
 synched_plot
 ```
 
-### STATIONARITY OF DATA
+```{r}
+bestMonthYear <- all_data %>%
+  mutate(Dated = parse_date_time(Date, orders = c("ymd", "ym", "my"))) %>%
+  group_by(Year = year(Dated), Month = month(Dated, label = TRUE)) %>% 
+  summarise(Ttl_Nests = n(), .groups = 'drop') %>%
+  # arrange by highest and pick the top one
+  arrange(desc(Ttl_Nests)) %>%
+  slice(1)
+# max nests - Month and Year
+#print(bestMonthYear) # July 2007 & 2016, 26 nests each
 
-Null Hypothesis, $H_0$: The data is non-stationary and contains a unit root
-  
-Alt. Hypothesis, $H_1$: The data is stationary and does not contain a unit root
-  
-Fail to Reject the Null Hypothesis iff p > 0.05
-    
-The Augmented Dickey-Fuller (ADF) Test Results:
-  - for **Nesting Activity, p = 0.0868**, and 
-  - for **Average Gulf Surface Temperature, p = 0.1000**.
-  
-Conclusion: We Fail to Reject the Null Hypothesis; **both sets of data are non-stationary** and the data must be stabilized.
+bestJuly <- all_data %>%
+  mutate(Dated = parse_date_time(Date, orders = c("ymd", "ym", "my"))) %>%
+  filter(month(Dated) == 7) %>% 
+  group_by(Year = year(Dated)) %>% 
+  summarise(Ttl_Nests = n(), .groups = 'drop') %>%
+  arrange(desc(Ttl_Nests))
+#bestJuly
+
+bestJune <- all_data %>%
+  mutate(Dated = parse_date_time(Date, orders = c("ymd", "ym", "my"))) %>%
+  filter(month(Dated) == 6) %>% 
+  group_by(Year = year(Dated)) %>% 
+  summarise(Ttl_Nests = n(), .groups = 'drop') %>%
+  arrange(desc(Ttl_Nests))
+#bestJune # June 2010, 23 nests
+```
+
+We used the KPSS p-value to evaluate Stationarity. The Null Hypothesis for the KPSS Test is that the data is stationary. The KPSS $p$-value was greater than 0.05, therefore we Fail to Reject the Null Hypothesis and we do not have enough evidence to conclude that  the data is non-stationary. The actual KPSS Test Results were p = 0.0868 for Nesting Activity, and p = 0.1000 for Average Gulf Surface Temperature. However, the ADF Test yielded that the $p$-value was 0.01 for both nesting counts and temperature data, therefore, we Rejected the Null Hypothesis and the data was claimed to be Stationary. While these results corroborated each other, subsequent visual inspections of the exploratory plots and statistically computed results show otherwise.
   
 ```{r}
-#Verification of Stationarity
-#ADF - Augmented Dickey-Fuller Test (Unit Root Test) - Statistical Verification
+# KPSS p-value
 kpss_pval <- SARIMAX_table %>%
   features(total_per_month, unitroot_kpss)
 #kpss_pval$kpss_pvalue
@@ -774,24 +728,74 @@ kpss_pval <- SARIMAX_table %>%
 root_pval_0 <- SARIMAX_table %>%
   features(avg_water_temp, unitroot_kpss)
 #root_pval_0$kpss_pvalue
-```
-  
-A Time Series Plot was configured and it showed that the **Mean and Variance were NOT constant** due to the peaks and valleys, i.e., confirming evidence that the data is Non-Stationary.
 
-### DECOMPOSITION DETERMINATION
+#ADF p-value
+#adf.test(SARIMAX_table$total_per_month, alternative = "stationary")
+#DF = -8.5671, Lag Order = 6, p-value = 0.01, alternative hypothesis: stationary
+
+#adf.test(SARIMAX_table$avg_water_temp, alternative = "stationary")
+#DF = -5.4239, Lag Order = 6, p-value = 0.01, alternative hypothesis: stationary
+
+TSA_plot <- SARIMAX_table %>% 
+  autoplot(total_per_month) +
+  geom_smooth(method = "loess", se = FALSE, color = "maroon", linetype = "dashed") +
+  labs(title = "TSA Plot of the Monthly Nesting Activity, 1998-2020",
+       subtitle = "Non-Stationary with Seasonal Peaks and Shifting Mean",
+       y = "Number of Nests",
+       x = "Year") +
+  theme_minimal()
+```
+
+```{r}
+#| warning: false
+#| message: false
+#| label: fig-TSA-plot
+#| fig-cap: "TSA Plot of Monthly Nesting Activity, 1998-2020"
+#| fig-align: center
+TSA_plot
+```
+A Time Series Plot was configured (@fig-TSA-plot) which revealed that the Mean and Variance were NOT constant due to the prominent peaks and valleys indicating a strong Seasonal influence. This is evidence that the data is, in fact, Non-Stationary because the plot clearly shows that the line is not straight which describes that the mean is shifting.
+
 ```{r}
 # Decomposition
 decomp_STL_nest_plot <- SARIMAX_table %>%
-  model(STL(total_per_month ~ trend(window = 23) + season(window = 12))) %>%
+  model(STL(total_per_month ~ trend(window = 21) + season(window = 11))) %>%
   components() %>%
   autoplot() +
-  labs(title = "Decomposition of Turtle Nesting Data",
+  labs(title = "Additive Decomposition of Turtle Nesting Data",
        subtitle = "Original = Trend (m) + Seasonal (s) + Remainder (R)")
+
+```
+
+The STL decomposition function, from the feasts package in R, was used to construct two component plots to identify if the data was best to undergo additive (@fig-STL-decomp) or multiplicative decomposition (@fig-log-STL-decomp).
+
+```{r}
+#| label: fig-STL-decomp
+#| fig-cap: "Additive Decomposition of Turtle Nesting Data (Log Transformed)"
+#| fig-align: center
 decomp_STL_nest_plot
 ```
-  This is an example of Multiplicative Decomposition because the Residuals, or Remainder, (Y) are not constant over time and are larger as the number of nests increase showing that the seasonal variance is proportional to the trend. The Seasonal component shows a very regular pattern. The Trend is showing a very slight upward relationship and could infer that conditions are becoming more favorable for nesting turtles. The trend has successfully captured the the full growth pattern of the data (including the notably large nesting month in 2017) and has ignored the month-to-month bumps. However, because the trend has a large bump, and not a completely horizontal line, shows the need for Differencing in the SARIMAX Model.  
-  The Nesting Trend Strength is 0.3163 (0.6 minimum) and considered weak in the SARIMAX model. Unfortunately, this does not bode well for nesting turtles since this shows that there is not a consistent upward trend, although spikes over the years are observed and more are possible in the future.
-  The Strong Nesting Seasonal Strength (0.7951) shows that there is a highly predictable season and can be seen directly in @tbl-CCseason-table.
+
+```{r}
+# Decomposition
+decomp_STL_nest_log <- SARIMAX_table %>%
+  model(STL(log(total_per_month +1) ~ trend(window = 21) + season(window = 11))) %>%
+  components() %>%
+  autoplot() +
+  labs(title = "Multiplicative Decomposition of Turtle Nesting Data (Log Transformed)",
+       subtitle = "Log(Original) = Trend (m) + Seasonal (s) + Remainder (R)")
+
+```
+
+```{r}
+#| label: fig-log-STL-decomp
+#| fig-cap: "Multiplicative Decomposition of Turtle Nesting Data (Log Transformed)"
+#| fig-align: center
+decomp_STL_nest_log
+```
+ The Multiplicative Decomposition (@fig-log-STL-decomp) was chosen because the Residuals, or Remainder, ($R_t$) are more constant over time and are larger as the number of nests increase showing that the seasonal variance is proportional to the trend, a characteristic known as heteroscedasticity. The Seasonal component shows a very regular pattern. The Trend is showing a very slight upward relationship and could infer that conditions are becoming more favorable for nesting turtles. The trend has successfully captured the the full growth pattern of the data (including the notably large nesting month in 2017 and the low count in 2012) and has smoothed over the month-to-month bumps. However, because the trend has a large bump, and not a completely horizontal line, concludes the need for Differencing in the SARIMAX Model. 
+ 
+The Nesting Trend Strength is 0.3163 (0.6 minimum) and considered weak in the SARIMAX model. Unfortunately, this does not bode well for nesting turtles since this shows that there is not a consistent upward trend, although spikes over the years are observed and more are possible in the future. The Strong Nesting Seasonal Strength (0.7951) revealed that there is a highly predictable season and can be seen directly in @tbl-CCseason-table.
   
 ```{r}
 nesting_str <- SARIMAX_table %>%
@@ -803,16 +807,22 @@ nesting_str <- SARIMAX_table %>%
 ```{r}
 # Decomposition
 decomp_STLS_plot <- SARIMAX_table %>%
-  model(STL(avg_water_temp ~ trend(window = 23) + season(window = 12))) %>%
+  model(STL(log(avg_water_temp) ~ trend(window = 21) + season(window = 11))) %>%
   components() %>%
   autoplot() +
   labs(title = "Decomposition of Average Water Temperature Data",
        subtitle = "Original = Trend (m) + Seasonal (s) + Remainder (R)")
+```
+
+```{r}
+#| label: fig-STLS-decomp
+#| fig-cap: "Multiplicative Decomposition of Average Water Temperature Data (Log Transformed)"
+#| fig-align: center
 decomp_STLS_plot
 ```
-  This is also an example of Multiplicative Decomposition because the Residuals, or Remainder, (Y) are not constant over time. The Seasonal component shows a very regular pattern. The Trend is showing an upward relationship and could infer that water temperatures are getting warmer over the the two decades of data. The month-to-month trend bumps have been smoothed out but the swings are very noticeable and shows the need for Differencing in the SARIMAX Model.
-  The Average Water Temperature Trend Strength is 0.7618 which is considered strong. Unfortunately, this does not bode well for nesting turtles since this shows that the sea surface temperatures are on an upward trend which may interfere with the sex imbalance within turtle populations.
-  The Strong Nesting Seasonal Strength (0.7571) shows that there is a highly predictable season and can also be seen directly in @tbl-CCseason-table.
+  @fig-STLS-decomp is also an example of Multiplicative Decomposition of the Average Water Temperature data because the Residuals, or Remainder, (Y) are not constant over time. The Seasonal component shows a very regular pattern. The Trend is showing an upward relationship and could infer that water temperatures are getting warmer over the the two decades of data. The month-to-month trend bumps have been smoothed out but the swings are very noticeable and shows the need for Differencing in the SARIMAX Model.
+  The Average Water Temperature Trend Strength is 0.7618 which is considered strong. Unfortunately, this does not bode well for nesting turtles since this shows that the sea surface temperatures are on an upward trend which may interfere with the sex imbalance within turtle populations. The Strong Nesting Seasonal Strength (0.7571) shows that there is a highly predictable season and can also be seen directly in @tbl-CCseason-table.
+  
 ```{r}
 water_str <- SARIMAX_table %>%
   features(avg_water_temp, feat_stl) %>%
@@ -820,10 +830,6 @@ water_str <- SARIMAX_table %>%
 #water_str
 ```
 
-  There is Differencing Loss in the model. The use of the Seasonal Differencing (D=1) makes the model disregard the first 12 months of data since it has no previous time to compare with.
-  
-  
-### MODEL SELECTION
 ```{r}
 # fpp3 and feasts
 ACF_nest <- SARIMAX_table %>%
@@ -831,19 +837,32 @@ ACF_nest <- SARIMAX_table %>%
   autoplot() +
   labs(title = "ACF: Visual Check of Annual Seasonality",
        subtitle = " - Monthly Nest Counts")
+```
+
+```{r}
+#| label: fig-ACF-nest
+#| fig-cap: "ACF: Visual Check of Annual Seasonality on Monthly Nest Counts"
+#| fig-align: center
 ACF_nest
 ```
-  The Nesting ACF Plot shows that there is Seasonality in the data showing yearly peaks. There is a definite trend since the bars stay high and decrease slowly over all lags. This also shows that the mean is shifting over time and Differencing is required for SARIMAX modelling.
+
 ```{r}
 ACF_water <- SARIMAX_table %>%
  feasts::ACF(avg_water_temp, lag_max = 264) %>%
   autoplot() +
   labs(title = "ACF: Visual Check of Annual Seasonality",
        subtitle = " - Monthly Average Water Temperature")
-ACF_water
 ```
-  The Water Temperature ACF Plot shows that there is Seasonality in the data showing varied yearly peaks. There is a trend since the bars generally stay high and decrease slowly over all lags with minor fluctuations. This corresponds to the mean shifting over time and supports that Differencing is required for the SARIMAX model.
- 
+
+```{r}
+#| label: fig-ACF-water
+#| fig-cap: "ACF: Visual Check of Annual Seasonality on Average Monthly Water Temperature"
+#| fig-align: center
+ACF_water
+``` 
+
+To begin our Model Selection process, we generated an ACF Plot (@fig-ACF-nest) for nesting data and it revealed that there is Seasonality in the data showing yearly peaks. There is a definite trend since the bars stay high and decrease slowly over all lags. This also shows that the mean is shifting over time and Differencing is required for SARIMAX modelling. The Water Temperature ACF Plot (@fig-ACF-water) shows that there is Seasonality in the data showing varied yearly peaks. There is a trend since the bars generally stay high and decrease slowly over all lags with minor fluctuations. This corresponds to the mean shifting over time and supports that Differencing is required for the SARIMAX model.
+
 ```{r}
 PACF_nest <- SARIMAX_table %>%
   PACF(total_per_month, lag_max = 264) %>%
@@ -852,10 +871,15 @@ PACF_nest <- SARIMAX_table %>%
   labs(title = "PACF: AR(p) component for SARIMAX",
        subtitle = " - Monthly Nesting Counts") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-PACF_nest
 ```
-  The PACF determines the order of AR via a "cutoff" point. The last significant cutoff point in the plot is at the 48 month mark after which the spikes are in, or very close to, the "insignificant zone" and is akin to "white noise". This shows there is some direct correlation with the data's own past values at the same time the previous year; therefore, p = 0.
 
+```{r}
+#| label: fig-PACF-nest
+#| fig-cap: "PACF: AR(p) component for SARIMAX on Monthly Nesting Counts"
+#| fig-align: center
+PACF_nest
+```   
+  
 ```{r}
 PACF_water <- SARIMAX_table %>%
   PACF(avg_water_temp, lag_max = 264) %>%
@@ -864,9 +888,16 @@ PACF_water <- SARIMAX_table %>%
   labs(title = "PACF: AR(p) component for SARIMAX",
        subtitle = " - Monthly Water Temps") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-PACF_water
 ```
-  The last significant cutoff point in the Temperature ACF plot is at the 36 month mark after which the spikes are in the "insignificant zone" and is akin to "white noise". This shows there is some direct correlation with the data's own past values at the same time the previous year; therefore, p = 0 still holds for the overall model behaviour.
+
+```{r}
+#| label: fig-PACF-water
+#| fig-cap: "PACF: Visual Check of Annual Seasonality on Average Monthly Water Temperature"
+#| fig-align: center
+PACF_water
+```   
+
+The PACF determines the order of AR via a "cutoff" point. The last significant cutoff point in the Nesting PACF plot (@fig-PACF-nest) is at the 48 month mark after which the spikes are in, or very close to, the "insignificant zone" and is akin to "white noise". This shows there is some direct correlation with the data's own past values at the same time the previous year; therefore, p = 0. The last significant cutoff point in the Temperature ACF plot (@fig-PACF-water) is at the 36 month mark after which the spikes are in the "insignificant zone" and is akin to "white noise". This shows there is some direct correlation with the data's own past values at the same time the previous year; therefore, p = 0 still holds for the overall model behaviour.
 
 ```{r}
 # Automatic Determining of p, q, P, Q for SARIMA
@@ -876,17 +907,11 @@ auto_SARIMA_fit <- SARIMAX_table %>%
   model(ARIMA(total_per_month))
 #report(auto_ARIMA_fit)
 
-#dataset_21 <- SARIMAX_table %>%
-#  filter(year(Year_Month) <= 2019)
-#auto_fit <- SARIMAX_table %>%
-#  model(ARIMA(total_per_month))
-#report(auto_fit)
-
 nest_stats <- tidy(auto_SARIMA_fit) %>%
   mutate(z_statistic = estimate / std.error) %>%
   select(term, estimate, std.error, z_statistic)
 
-nest_stats %>%
+nest_stats <- nest_stats %>%
   gt() %>%
   gt::tab_header(title = "SARIMA Automatic Modelling Coefficients",
              subtitle = "- ARIMA(0,0,2)(0,0,1)[12] for Nesting Activity") %>%
@@ -894,54 +919,52 @@ nest_stats %>%
              std.error = "Std. Error", z_statistic = "z-value")
 ```
 
+```{r}
+#| label: fig-nest-stats
+#| tbl-cap: "SARIMA Automatic Modelling Coefficients for Nesting Activity"
+#| tbl-align: center
+nest_stats
+```   
+
   The automatically-fitted model gives us ARIMA(0,0,2)(0,0,1)[12] and the backshift equation is as follows:
   
-$$
+$$\begin{equation}
     y_t=(1+\theta_1 B+ \theta_2 B^2)(1+\Theta_1 B^{12})\epsilon_t
-$$ 
-  However, the ADF test shows that the model is non-stationary and is in need of Differencing. We must keep the model as parsimonious as possible but the model is invalid in its current form. Adding Differencing, D = 1, will satisfy the requirement to stabilize the data and, also, flatten out the mean over time. This model will be tested as a "neighbor" model during training and validation stage to verify its fit. Adding the Differencing adds a term to the left side of the model equation and mathematically interprets the annual changes in turtle nesting as shown below:
-$$
+\end{equation}$$ 
+
+  The Time Series Plot showed that the mean and the variance were not constant and the mean was shifting and so the model is in need of Differencing. We must keep the model as parsimonious as possible but the model is invalid in its current form. Adding Differencing, D = 1, will satisfy the requirement to stabilize the data and, also, flatten out the mean over time. This model will be tested as a "neighbor" model during training and validation stage to verify its fit. Adding the Differencing adds a term to the left side of the model equation and mathematically interprets the annual changes in turtle nesting as shown below:
+  
+$$\begin{equation}
     (1-B^{12})y_t=(1+\theta_1 B+ \theta_2 B^2)(1+\Theta_1 B^{12})\epsilon_t
                  =(1+0.6B+ 0.14B^2)(1-0.7B^{12})\epsilon_t
-$$
+\end{equation}$$
  
-**-** ma1 = 0.60 (s.e. = 0.063, significant since z > 1.96)
-
-**-** ma2 = 0.14 (s.e. = 0.062, significant since z > 1.96)
-
-**-** sma1 = -0.70 (s.e. = 0.058, significant since z > 1.96)
+where ma1 = 0.60 (s.e. = 0.063, significant since |z| > 1.96), ma2 = 0.14 (s.e. = 0.062, significant since |z| > 1.96), sma1 = -0.70 (s.e. = 0.058, significant since |z| > 1.96)
 
 ```{r}
-sarima_fit_auto <- auto_SARIMA_fit %>% gg_tsresiduals() +
+sarima_fit_auto <- auto_SARIMA_fit %>% 
+  gg_tsresiduals() +
 labs(title = "Nesting Residuals: Auto-generated SARIMA") 
+
+#| label: fig-sarima-fit-auto
+#| tbl-cap: "Nesting Residuals: Auto-generated SARIMA"
+#| tbl-align: center
 sarima_fit_auto
-```
-  The ARMA, or Autoregression (AR) and Moving Average (MA), base accounts for zero AR terms and a two month MA. The AR is zero because of the strong seasonality of the model (PQ has more influence). Also, the exogenous surface water temperature shows that it holds the momentum of the monthly nesting activity and provides an innate seasonality to the model. 
-  The S in SARIMA includes Seasonality to the ARIMA model; P, D, and Q define the Seasonality of the model as well as the Differencing needed to stabilize the mean.
-  The X in SARIMAX adds the exogenous (external) variable of Surface Water Temperature and also adds an environmental influence.
-  The final SARIMAX equation with respect to Nesting Activity, and including Differencing, is as follows: 
+```   
+
+The ARMA, or Autoregression (AR) and Moving Average (MA), base accounts for zero AR terms and a two month MA. The AR is zero because of the strong seasonality of the model (PQ has more influence). Also, the exogenous surface water temperature shows that it holds the momentum of the monthly nesting activity and provides an innate seasonality to the model. The S in SARIMA includes Seasonality to the ARIMA model; P, D, and Q define the Seasonality of the model as well as the Differencing needed to stabilize the mean. The X in SARIMAX adds the exogenous (external) variable of Surface Water Temperature and also adds an environmental influence.The final SARIMAX equation with respect to Nesting Activity, and including Differencing, is as follows: 
   
-$$ SARIMAX(p,d,q)(P,D,Q)_{AnnualLag} = SARIMAX(0,0,2)(0,1,1)_{12} $$ 
+$$\begin{equation}
+SARIMAX(p,d,q)(P,D,Q)_{AnnualLag} = SARIMAX(0,0,2)(0,1,1)_{12} 
+\end{equation}$$ 
   
-  - Difference: **d = 0**, although the mean was not a flat horizontal line, it was stable across of the series. Adding d = 1 makes the model less parsimonious, therefore less efficient, and avoids over-differencing which almost always leads to overfitting.
+The Difference of d = 0 is explained by the fact that our model needed long-term seasonal differencing, D; adding d=1 to the model would add another parameter and could make our model less efficient. Also, too much diferencing can lead to over-differencing which almost always leads to overfitting. There was a Seasonal Difference of D = 1 specified for the model due to strong Seasonal Strength of both the nesting activity and the water temperature, the model is strong enough to drive its own seasonality; it could also be that the dip in 2019 nesting activity could have been the slight disruption that set D = 0. There will be a Differencing Loss in the model; the use of the Seasonal Differencing (D=1) makes the model disregard the first 12 months of data since it has no previous time to compare with. The Autoaggressive component was p = 0 since the number of nests found in one month does not have a ripple effect from the previous month possibly because turtles nest up to every two weeks (on average) during a season but only make an average of 4 nests over a maximum season of 5 months. The Seasonal Autoaggressive was P = 0 because the number of nests found in one season does not have a ripple effect from the previous season possibly because turtles nest every two or more years (on average). Our Moving Average was **q = 2**, the model has memory from the previous 2 months to adjust for the current month. The Seasonal Moving Average was Q = 1 whereby the model is able to adjust for inconsistencies in nest counts from last year to the current year's prediction. Inconsistencies can arise from weather deviations like cold snaps or hurricanes and other environmental disasters like the Gulf oil spill of Summer, 2010. 
 
-  - Seasonal Difference: **D = 1**, due to strong Seasonal Strength of both the nesting activity and the water temperature, the model is strong enough to drive its own seasonality; it could also be that the dip in 2019 nesting activity could have been the slight disruption that set D = 0.
-
-  - Autoaggressive: **p = 0**, the number of nests found in one month does not have a ripple effect from the previous month possibly because turtles nest up to every two weeks (on average) during a season but only make an average of 4 nests over a maximum season of 5 months.
-
-  - Seasonal Autoaggressive: **P = 0**, the number of nests found in one season does not have a ripple effect from the previous season possibly because turtles nest every two or more years (on average).
-
-  - Moving Average: **q = 2**, the model has memory from the previous 2 months to adjust for the current month.
-
-  - Seasonal Moving Average: **Q = 1**, the model is able to adjust for inconsistencies in nest counts from last year to the current year's prediction. Inconsistencies can arise from weather deviations like cold snaps or hurricanes and other environmental disasters like the Gulf oil spill of Summer, 2010.
-  
-  Checking Residuals: shows the graphical representation of the residuals. The following analysis proves that the Auto-generated ARIMA can be considered an accurate representation of the model. 
-
-  The Innovation Residuals show that the minor "shock" fluctuations mostly remain around a zero-mean like ideal "White Noise". The unexpected negative influence (significant innovation or "shock") at the end of the system shows that the model was not expecting the lower nesting numbers. The equation below explains how the "shocks" that occur in the system are represented to account for unpredictable fluctuations after seasonal and trend instances have been accounted for.
+@fig-sarima-fit-auto shows the graphical representation of the residuals. The following analysis proves that the Auto-generated ARIMA can be considered an accurate representation of the model. The Innovation Residuals show that the minor "shock" fluctuations mostly remain around a zero-mean like ideal "White Noise". The unexpected negative influence (significant innovation or "shock") at the end of the system shows that the model was not expecting the lower nesting numbers. The equation below explains how the "shocks" that occur in the system are represented to account for unpredictable fluctuations after seasonal and trend instances have been accounted for.
     
-$$ 
+$$\begin{equation} 
     \epsilon_t = y_t - E[y_t|PastInformation] 
-$$
+\end{equation}$$
     
   Using the Ljung-Box Test (ACF Analysis), the lack of lag spikes outside of the boundaries of the ACF of Residuals shows that the model contains most of the information from the data and what is left consists mostly of random noise. The ACF plot confirms that the residuals are made up of white noise and are considered uncorrelated. The model can be viewed as a success given that the spikes at 12 and 24 are within the "insignificant" zone. There is one spike at 23 months that is most likely to be an example of mathematical "shadowing" or an interaction/cross-product. The cross-product is formed from multiplying terms from the model equation that represents the non-seasonal MA (2) and the seasonal MA (1), in our case, $(1+\theta_1 B+\theta_2 B^2) \times (1+\Theta_1 B^{12})$. The resulting interaction terms, $B^{S\pm 1}$ and $B^{S\pm 2}$, mathematically explain the second-order shadowing effect observed at Lag 23 (2S-1, for S=12). This is a known property of multiplicative models as established by @BoxJenkins1970. The spike at Lag 23 is not a representation of an omitted seasonal cycle but a mathematical resonance of the 12 and 11 month dependencies and so can be ignored now that it has been accounted for.
 
@@ -949,7 +972,7 @@ $$
   
   In conclusion, the three plots encapsulate the idea that all available patterns have been captured. The residuals have shown to be uncorrelated and normally distributed allowing the confidence levels to expand over time at a realistic rate during extended forecasting.
     
-### TRAINING AND VALIDATION
+**TRAINING AND VALIDATION**
 
   The base_sarimax and pdq_sarimax (has p-d-q-P-D-Q values hard-coded into its model) achieved the best overall performance with an Akaike Information Criterion (AIC) of 1544.76 for all data from 1988 to 2018. The data for 2020 is set aside to be used to evaluate the model's performance on new unseen data. The negatively-influenced nesting season of 2020 will test the robustness of the model's ability to forecast effectively and accurately.
 
@@ -1022,9 +1045,7 @@ kable_AICc_updated <- combo_metrics %>%
              log_lik = "Log Likelihood", sigma2 = "Sigma Squ.") %>%
   cols_align("left", columns = Model) %>%
   cols_align(align = "center", columns = c(AICc, AIC, BIC, log_lik, sigma2))
-  
- kable_AICc_updated 
- 
+
 ###########################################################
 trained_tidied <- trained_dataset %>%
   fill_gaps(total_per_month = 0) %>%
@@ -1034,14 +1055,17 @@ trained_GAM_models <- trained_tidied %>%
   model(gam_sarimax = prophet(nest_log ~ growth("linear") + 
                   season(period = "year", order = 4, type = "multiplicative")), 
         prophet_GAM_FS = prophet(nest_log ~ growth("linear") + season(period = "year", order = 8)))
-
-
-#trained_GAM_models  
-#fit_metrics <- trained_GAM_models %>%
- #glance()
 ```
 
-### FORECASTING
+```{r}
+#| label: AICc-updated
+#| tbl-cap: "AICc Scores (Ranked Lowest to Highest) of all Models"
+#| echo: false
+ kable_AICc_updated 
+```
+
+
+**FORECASTING**
 ```{r}
 train <- SARIMAX_table %>% filter_index("1998 Jan" ~ "2018 Dec")
 test  <- SARIMAX_table %>% filter_index("2019 Jan" ~ "2020 Dec")
@@ -1064,45 +1088,82 @@ validation_test_alt <- train_fit_alt %>%
 
 ```{r}
 # plotting the training, testing, and forecast together
-validation_test %>%
+val_test <- validation_test %>%
   autoplot(SARIMAX_table %>% filter_index("1998 Jan" ~ "2020 Dec"), level = 95) + # when using train, the scale will only go to 2019
-  autolayer(test, total_per_month, colour = "red", linewidth = 1) +
-  labs(title = "Validation: 21-Year Model vs. 2020 Actuals",
-       y = "Nests", x = "Year") +
-  theme_minimal()
-
-# plotting the training, testing, and forecast together
-validation_test_alt %>%
-  autoplot(SARIMAX_table %>% filter_index("1998 Jan" ~ "2020 Dec"), level = 95) + # when using train, the scale will only go to 2019
-  autolayer(test, total_per_month, colour = "red", linewidth = 1) +
-  labs(title = "Validation: 21-Year Model vs. 2020 Actuals",
+  autolayer(test, total_per_month, colour = "maroon", linewidth = 1) +
+  labs(title = "Validation: 20-Year Model vs. 2019 and 2020 Actuals",
        y = "Nests", x = "Year") +
   theme_minimal()
 ```
 
 ```{r}
-validation_test %>%
+# plotting the training, testing, and forecast together
+val_test_temp <- validation_test_alt %>%
+  autoplot(SARIMAX_table %>% filter_index("1998 Jan" ~ "2020 Dec"), level = 95) + # when using train, the scale will only go to 2019
+  autolayer(test, total_per_month, colour = "green4", linewidth = 1) +
+  labs(title = "Validation (with temperature): 20-Year Model vs. 2019 and 2020 Actuals",
+       y = "Nests", x = "Year") +
+  theme_minimal()
+```
+
+```{r}
+#| warning: false
+#| message: false
+#| label: fig-val-test
+#| fig-cap: "Validation Test Plot: 20-yr Model vs 2-yr Test Set"
+val_test
+```
+
+```{r}
+#| warning: false
+#| message: false
+#| label: fig-val-test-temp
+#| fig-cap: "Validation Test Plot: 20-yr Model vs 2-yr Test Set (Using Temperature)"
+val_test_temp
+```
+
+```{r}
+val_test_zoom <- validation_test %>%
   filter_index("2017 Jan" ~ "2020 Dec") %>%
   autoplot(train %>% filter_index("2017 Jan" ~ "2020 Dec"), level = 95) +
   # add the actual 2019-2020 points (the test set)
   autolayer(test, total_per_month, colour = "maroon", size = 1) +
-  labs(title = "Close-up: 2020 Model Validation",
-       subtitle = "Blue area: 95% Prediction Interval | Red line: Actual 2020 Nesting",
-       x = "Month", y = "Number of Nests") +
-  theme_minimal()
-
-validation_test_alt %>%
-  filter_index("2017 Jan" ~ "2020 Dec") %>%
-  autoplot(train %>% filter_index("2017 Jan" ~ "2020 Dec"), level = 95) +
-  # add the actual 2019-2020 points (the test set)
-  autolayer(test, total_per_month, colour = "green4", size = 1) +
-  labs(title = "Close-up: 2020 Model Validation (with temperature)",
-       subtitle = "Blue area: 95% Prediction Interval | Red line: Actual 2020 Nesting",
+  labs(title = "Close-up: 2019 and 2020 Model Validation",
+       subtitle = "Blue area: 95% Prediction Interval | Maroon line: Actual 2019 and 2020 Nesting",
        x = "Month", y = "Number of Nests") +
   theme_minimal()
 ```
 
-### METRICS
+```{r}
+val_test_temp_zoom <- validation_test_alt %>%
+  filter_index("2017 Jan" ~ "2020 Dec") %>%
+  autoplot(train %>% filter_index("2017 Jan" ~ "2020 Dec"), level = 95) +
+  # add the actual 2019-2020 points (the test set)
+  autolayer(test, total_per_month, colour = "green4", size = 1) +
+  labs(title = "Close-up: 2019 and 2020 Model Validation (with temperature)",
+       subtitle = "Blue area: 95% Prediction Interval | Green line: Actual 2020 Nesting",
+       x = "Month", y = "Number of Nests") +
+  theme_minimal()
+```
+
+```{r}
+#| warning: false
+#| message: false
+#| label: fig-val-test-zoom
+#| fig-cap: "Validation Test Plot: 20-yr Model vs 2-yr Test Set"
+val_test_zoom
+```
+
+```{r}
+#| warning: false
+#| message: false
+#| label: fig-val-test-temp-zoom
+#| fig-cap: "Validation Test Plot: 20-yr Model vs 2-yr Test Set (Using Temperature)"
+val_test_temp_zoom
+```
+
+**METRICS**
+
 ```{r}
 # Ljung-Box test result for base_sarimax - final test to confidently use the SARIMAX model - PASS
 # LB test quantifies the lack of protrusions (spikes) in the ACF plot
@@ -1112,7 +1173,7 @@ ljung_box_table <- trained_models %>%
   augment() %>%
   features(.innov, ljung_box, lag = 24, dof = 3) # dof = p + q + P + Q = 3, the model can only estimate these
 
-ljung_box_table %>%
+lb_table <- ljung_box_table %>%
   gt() %>%
   gt::tab_header(title = "Ljung-Box Residual Test Results",
              subtitle = "- n_sarimax_002_011") %>%
@@ -1126,14 +1187,29 @@ ljung_box_temp <- temp_fit2 %>%
   augment() %>%
   features(.innov, ljung_box, lag = 24, dof = 3) # dof = p + q + P + Q = 3, the model can only estimate these
 
-
-ljung_box_temp %>%
+lb_temp <- ljung_box_temp %>%
   gt() %>%
   gt::tab_header(title = "Ljung-Box Residual Test Results",
              subtitle = "- temp_sarimax_002_011") %>%
   gt::cols_label(.model = "Model", lb_stat = "Q-Statistic",
              lb_pvalue = "p-value")
 ```
+
+```{r}
+#| label: ljung-box--table
+#| tbl-cap: "Ljung-Box Residual Test Results for Top Performing Model"
+#| echo: false
+lb_table
+```
+
+```{r}
+#| label: ljung-box-temp-table
+#| tbl-cap: "Ljung-Box Residual Test Results for Temperature Model"
+#| echo: false
+lb_temp
+```
+
+
 ```{r}
 # training (20 years)
 #train_fit <- train %>%
@@ -1185,10 +1261,11 @@ RMSE_acc_alt %>%
   gt::cols_label(.model = "Model", RMSE = "RMSE",
              MAE = "MAE") 
 ```
-The average number of nests that the model prediction is "off" is approximately 8 which is a good result. 
+
+The average number of nests that the model prediction varies is approximately 4-9 which is a good result. 
   
 
-## MODEL PERFORMANCE AND COMPARISONS
+### MODEL PERFORMANCE AND COMPARISONS
 
 
 $$
@@ -1196,25 +1273,25 @@ $$
 $$
 where $\eta_t$ is an ARIMA process
 
-## UNCERTAINTY AND VARIABILITY
+### UNCERTAINTY AND VARIABILITY
 
 TBD
 
-## DISCUSSION
+### DISCUSSION
 
 Notice the sharp downward spike in the remainder at the very end (late 2019/2020).
 This suggests that the actual nesting was much lower than the model expected for that time of year.
 This is a great point for your Discussion section—you can investigate if there was a late-season storm or a temperature drop that caused this deviation.
 
-## LIMITATIONS AND CHALLENGES
+### LIMITATIONS AND CHALLENGES
 
 No new data after 2020 available.
 
-## IMPLICATIONS
+### IMPLICATIONS
 
 The unbiased nature of the model is very important when used with respect to conservation efforts. Since the residuals are centered about zero, the model can estimate the population fairly accurately without over- or under-estimating. This provides a realistic baseline for the nesting activity of the Loggerhead Turtles resulting in informed protection efforts and more precise resource allocation along the Gulf Coast.
 
-## CONCLUSION
+### CONCLUSION
 
 - **Training and Validation**
   - Experimenting with different models
@@ -1222,7 +1299,7 @@ The unbiased nature of the model is very important when used with respect to con
   - AICc metric determines best model
 
 
-## ADDITIONAL TABLES AND VISUALIZATIONS
+#### ADDITIONAL TABLES AND VISUALIZATIONS
 
 ```{r}
  kable_table_nest_temps <- SARIMAX_table %>%
@@ -1281,42 +1358,6 @@ kable_table_season_dates
 ind_plots
 ```
 
-```{r}
-bestMonthYear <- all_data %>%
-  mutate(Dated = parse_date_time(Date, orders = c("ymd", "ym", "my"))) %>%
-  group_by(Year = year(Dated), Month = month(Dated, label = TRUE)) %>% 
-  summarise(Ttl_Nests = n(), .groups = 'drop') %>%
-  # arrange by highest and pick the top one
-  arrange(desc(Ttl_Nests)) %>%
-  slice(1)
-# max nests - Month and Year
-print(bestMonthYear)
 
-worstMonthYear <- all_data %>%
-  mutate(Dated = parse_date_time(Date, orders = c("ymd", "ym", "my"))) %>%
-  group_by(Year = year(Dated), Month = month(Dated, label = TRUE)) %>% 
-  summarise(Ttl_Nests = n(), .groups = 'drop') %>%
-  # arrange by highest and pick the top one
-  arrange(desc(-Ttl_Nests)) %>%
-  slice(1)
-# min nests - Month and Year
-print(worstMonthYear)
-
-bestJuly <- all_data %>%
-  mutate(Dated = parse_date_time(Date, orders = c("ymd", "ym", "my"))) %>%
-  filter(month(Dated) == 7) %>% 
-  group_by(Year = year(Dated)) %>% 
-  summarise(Ttl_Nests = n(), .groups = 'drop') %>%
-  arrange(desc(Ttl_Nests))
-bestJuly
-
-bestJune <- all_data %>%
-  mutate(Dated = parse_date_time(Date, orders = c("ymd", "ym", "my"))) %>%
-  filter(month(Dated) == 6) %>% 
-  group_by(Year = year(Dated)) %>% 
-  summarise(Ttl_Nests = n(), .groups = 'drop') %>%
-  arrange(desc(Ttl_Nests))
-bestJune
-```
 
   
