@@ -1,6 +1,6 @@
 ---
 title: "The Nature of Time Series Analysis: Phenological Study of Gulf Coast Turtle Nesting Activity"
-author: "Rachel Hudson"
+author: "Rachel Hudson (Advisors: Dr. Pu, Dr. Seals, Dr. Schmutz)"
 
 number-sections: false
 highlight-style: pygments

@@ -715,9 +715,9 @@ $$
 
 ## Future Work {background-color="#528B8B"}
 
-* Looking at the beginning and end dates
-* Observing how the peak of the nesting season changes over time.
-* Individual areas to concentrate conservation activities
+* Evaluate if the the beginning and end dates are shifting in relation to the peak nesting season
+* Observe if the peak of the nesting season has been changing over time
+* Spatial nesting activity  
 
 ## References{.smaller background-color="#528B8B"}
 
@@ -731,9 +731,6 @@ myfwc.com
 
 Troeger, D. (2022). goodnewsnetwork.org
 
-## {background-color="#528B8B"}
+## Questions? {background-color="#528B8B"}
 
-::: {style="font-size: 2.5em; font-weight: bold; text-align: centered"}
-## Questions?
-:::
 
